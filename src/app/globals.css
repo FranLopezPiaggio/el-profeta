@@ -1,14 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  /* Binding de las variables CSS inyectadas por Next/Font */
+  --font-passion: var(--font-passion), sans-serif;
   --font-body: var(--font-body), sans-serif;
   --font-fredoka: var(--font-fredoka), sans-serif;
   --font-russo: var(--font-russo), sans-serif;
   --font-squada: var(--font-squada), sans-serif;
-  --font-passion: var(--font-passion), sans-serif;
 
-  /* Paleta de la Marca (Cerveza Artesanal / Colores Tierra y Sol) */
+  /* Paleta de la Marca */
   --color-brand-green: #2d5a27;
   --color-brand-gold: #e5a93c;
   --color-brand-earth: #78350f;

@@ -1,13 +1,24 @@
+// src/app/page.tsx
+import { Navbar } from '@/ui/components/modules/Navbar';
 import { Hero } from '@/ui/components/modules/Hero';
-import { Catalog } from '@/ui/components/modules/Catalog';
+import { BeerCatalog } from '@/ui/components/catalog/BeerCatalog';
+import { BeerCategory } from '@/types/beers';
 
-export default function HomePage() {
+interface PageProps {
+    searchParams: Promise<{ categoria?: string }>;
+}
+
+export default async function Home({ searchParams }: PageProps) {
+    const { categoria } = await searchParams;
+    const selectedCategory = (categoria as BeerCategory) || 'todos';
+
     return (
         <>
-            <Hero />
-            <div className='w-full h-[100vh] bg-brand-green2'>
-                <Catalog />
-            </div>
+            <Navbar />
+            <main className="w-full mx-auto space-y-8">
+                <Hero />
+                <BeerCatalog selectedCategory={selectedCategory} />
+            </main>
         </>
     );
 }

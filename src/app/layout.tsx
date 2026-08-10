@@ -7,6 +7,7 @@ import {
   Passion_One
 } from 'next/font/google'; import { Navbar } from '@/ui/components/modules/Navbar';
 import './globals.css';
+import { AgeVerificationModal } from '@/ui/components/modules/AgeVerification';
 
 // Fuentes Display (Titulares / Branding)
 const fontFredoka = Fredoka({
@@ -52,12 +53,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${fontFredoka.variable}${fontRussoOne.variable}${fontSquadaOne.variable}${fontPassionOne.variable}${fontNunito.variable}`}>
-      <body className="min-h-[100dvh] flex flex-col font-body text-stone-800 antialiased">
-        <Navbar />
+    <html
+      lang="es"
+      className={`${fontFredoka.variable} ${fontRussoOne.variable} ${fontSquadaOne.variable} ${fontPassionOne.variable} ${fontNunito.variable}`}
+    >
+      <body className="min-h-[100dvh] flex flex-col text-stone-800 antialiased">
         {/* MODIFICACIÓN: <main> ahora es 100% libre a lo ancho */}
         <main className="flex-1 w-full">
           {children}
+          <AgeVerificationModal />
         </main>
       </body>
     </html>

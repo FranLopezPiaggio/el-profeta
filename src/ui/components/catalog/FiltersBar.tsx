@@ -38,11 +38,8 @@ export function FilterBar() {
     };
 
     return (
-        <div className="w-full bg-brand-cream/60 backdrop-blur-md p-4 rounded-2xl border border-brand-earth/10 shadow-sm mb-8">
+        <div className="max-w-[1200px]mx-auto">
             <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
-                <span className="font-passion text-brand-earth text-lg mr-2 hidden sm:inline-block">
-                    Estilos:
-                </span>
                 {CATEGORIES.map((cat) => {
                     const isActive = currentCategory === cat.value;
                     return (
@@ -51,10 +48,10 @@ export function FilterBar() {
                             type="button"
                             onClick={() => handleFilterChange(cat.value)}
                             className={`
-                px-5 py-2 rounded-full font-fredoka text-sm font-semibold whitespace-nowrap transition-all duration-200
+                px-5 py-2 font-fredoka text-sm font-semibold whitespace-nowrap transition-all duration-200
                 ${isActive
                                     ? 'bg-brand-green text-white shadow-md scale-105'
-                                    : 'bg-white/80 text-stone-700 hover:bg-brand-gold/20 hover:text-brand-earth'
+                                    : 'bg-white/80 text-stone-700 hover:bg-brand-gold/20 hover:text-brand-bone-white'
                                 }
               `}
                         >

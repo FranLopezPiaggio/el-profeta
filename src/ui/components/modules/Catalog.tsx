@@ -1,4 +1,4 @@
-import { FilterBar } from "../FiltersBar";
+import { FilterBar } from "../catalog/FiltersBar";
 
 export function Catalog() {
     return (
