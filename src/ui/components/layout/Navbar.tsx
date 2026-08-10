@@ -30,12 +30,12 @@ export function Navbar() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="#nosotros" className="hover:text-brand-green transition-colors">
+                            <Link href="#choperas-eventos" className="hover:text-brand-green transition-colors">
                                 Alquiler Choperas
                             </Link>
                         </li>
                         <li>
-                            <Link href="#eventos" className="hover:text-brand-green transition-colors">
+                            <Link href="#choperas-eventos" className="hover:text-brand-green transition-colors">
                                 Eventos
                             </Link>
                         </li>

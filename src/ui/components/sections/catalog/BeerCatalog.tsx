@@ -2,7 +2,9 @@
 import { FilterBar } from '@/ui/components/sections/catalog/FiltersBar';
 import { BeerGrid } from '@/ui/components/sections/catalog/BeerGrid';
 import { BeerCategory, Beer } from '@/types/beers';
+import { ScaleIn } from '../../common/ScaleIn';
 import Image from 'next/image';
+
 
 const MOCK_BEERS: Beer[] = [
     {
@@ -58,13 +60,15 @@ export function BeerCatalog({ selectedCategory }: BeerCatalogProps) {
                     <h2 id="nuestras-cervezas" className="font-passion text-4xl text-white tracking-wide">
                         Nuestras Cervezas
                     </h2>
-                    <Image
-                        src="/logo-removebg-preview.png"
-                        alt="El Profeta Logo"
-                        width={100}
-                        height={100}
-                        className="-mt-16 z-20"
-                    />
+                    <ScaleIn className="inline-block">
+                        <Image
+                            src="/logo-removebg-preview.png"
+                            alt="El Profeta Logo"
+                            width={100}
+                            height={100}
+                            className="-mt-16 ml-8 z-20"
+                        />
+                    </ScaleIn>
                 </div>
 
                 <FilterBar />

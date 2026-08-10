@@ -6,4 +6,6 @@ export interface BentoItem {
     imageSrc?: string;
     colSpan?: string; // Clases opcionales de grid span (ej: 'md:col-span-2')
     rowSpan?: string;
+    ctaText?: string;
+    ctaLink?: string;
 }

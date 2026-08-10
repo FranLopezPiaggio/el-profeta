@@ -13,20 +13,25 @@ export function BentoCard({
 }: BentoItem) {
     return (
         <article
-            className={`group relative overflow-hidden rounded-2xl bg-brand-cream/10 border border-white/10 p-6 flex flex-col justify-between transition-all duration-300 hover:border-brand-gold/50 hover:shadow-xl ${colSpan} ${rowSpan}`}
+            className={`group relative overflow-hidden rounded-2xl bg-stone-900/60 border border-white/10 p-6 flex flex-col justify-between transition-all duration-300 hover:border-brand-gold/50 hover:shadow-xl min-h-[220px] ${colSpan} ${rowSpan}`}
         >
             {/* Fondo con imagen y overlay para legibilidad */}
             {imageSrc && (
-                <>
-                    <div className="absolute inset-0 -z-10 group-hover:scale-105 transition-transform duration-500">
-                        <Image src={imageSrc} alt={title} fill className="object-cover" />
-                    </div>
-                    <div className="absolute inset-0 -z-10 bg-gradient-to-t from-brand-black/90 via-brand-black/50 to-transparent" />
-                </>
+                <div className="absolute inset-0 z-0 overflow-hidden">
+                    <Image
+                        src={imageSrc}
+                        alt={title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {/* Capa de degradado oscuro para contrastar con el texto blanco */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
+                </div>
             )}
 
-            {/* Contenido Superior */}
-            <div>
+            {/* Contenido Superior (z-10 asegura que quede sobre la imagen) */}
+            <div className="relative z-10">
                 {category && (
                     <span className="text-xs font-semibold uppercase tracking-wider text-brand-gold">
                         {category}
@@ -40,8 +45,8 @@ export function BentoCard({
                 </p>
             </div>
 
-            {/* Detalle visual o CTA inferior */}
-            <div className="mt-6 flex items-center text-xs text-brand-gold font-medium">
+            {/* Detalle visual o CTA inferior (relative z-10) */}
+            <div className="relative z-10 mt-6 flex items-center text-xs text-brand-gold font-medium">
                 {ctaText ? (
                     <a href={ctaLink || '#'} className="inline-flex items-center hover:underline">
                         <span>{ctaText}</span>

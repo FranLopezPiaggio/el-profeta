@@ -6,6 +6,7 @@ import { BeerCategory } from '@/types/beers';
 import { TopGradientBubbles } from '@/ui/components/common/TopGradientBubbles';
 import { Footer } from '@/ui/components/layout/Footer'
 import { BentoGridSection } from '@/ui/components/sections/home/BentoGridSection';
+import { Testimonials } from '@/ui/components/sections/home/Testimonials';
 
 interface PageProps {
     searchParams: Promise<{ categoria?: string }>;
@@ -23,7 +24,7 @@ export default async function Home({ searchParams }: PageProps) {
                 <TopGradientBubbles />
                 <BeerCatalog selectedCategory={selectedCategory} />
                 <BentoGridSection />
-                <div className="bg-[url('/bg-grey-hops.png')] w-full h-[500px]" />
+                <Testimonials />
                 <Footer />
             </main>
         </>

@@ -1,15 +1,16 @@
 import React from 'react';
-import { TESTIMONIALS } from '../data/kegs';
+import Image from 'next/image';
 import { Star, Quote, Beer } from 'lucide-react';
+import { TESTIMONIALS } from '@/data/kegs';
 
-export const Testimonials: React.FC = () => {
+export function Testimonials() {
     return (
-        <section className="py-20 bg-[#F3EBDD]/40 border-t border-[#3B2314]/10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative py-20 border-t border-[#3B2314]/10 bg-[#F3EBDD]/40 bg-[url('/bg-grey-hops.png')] bg-cover bg-center bg-no-repeat w-full">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 {/* Header */}
                 <div className="text-center max-w-2xl mx-auto mb-14">
-                    <div className="inline-flex items-center gap-2 text-[#7C9031] font-bold text-xs uppercase tracking-widest bg-[#7C9031]/15 px-3.5 py-1.5 rounded-full mb-3 rustic-stamp">
+                    <div className="inline-flex items-center gap-2 text-[#7C9031] font-bold text-xs uppercase tracking-widest bg-[#7C9031]/15 px-3.5 py-1.5 rounded-full mb-3">
                         <Beer className="w-3.5 h-3.5 text-[#3B2314]" />
                         <span>Comunidad & Opiniones</span>
                     </div>
@@ -26,7 +27,7 @@ export const Testimonials: React.FC = () => {
                     {TESTIMONIALS.map((item) => (
                         <div
                             key={item.id}
-                            className="bg-[#FBF8F1] p-6 rounded-2xl border border-[#3B2314]/12 shadow-warm relative flex flex-col justify-between"
+                            className="bg-[#FBF8F1] p-6 rounded-2xl border border-[#3B2314]/10 shadow-sm relative flex flex-col justify-between"
                         >
                             <Quote className="absolute top-4 right-4 w-8 h-8 text-[#D98A29]/20" />
 
@@ -39,19 +40,23 @@ export const Testimonials: React.FC = () => {
                                 </div>
 
                                 <p className="text-sm text-[#3B2314]/85 leading-relaxed italic">
-                                    "{item.comment}"
+                                    &ldquo;{item.comment}&rdquo;
                                 </p>
                             </div>
 
                             {/* Author Footer */}
                             <div className="pt-6 mt-6 border-t border-[#3B2314]/10 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <img
-                                        src={item.avatar}
-                                        alt={item.name}
-                                        referrerPolicy="no-referrer"
-                                        className="w-10 h-10 rounded-full object-cover border border-[#D98A29]"
-                                    />
+                                    <div className="relative w-10 h-10 rounded-full overflow-hidden border border-[#D98A29] flex-shrink-0">
+                                        <Image
+                                            src={item.avatar}
+                                            alt={item.name}
+                                            fill
+                                            unoptimized
+                                            sizes="40px"
+                                            className="object-cover"
+                                        />
+                                    </div>
                                     <div>
                                         <h4 className="font-serif text-sm font-bold text-[#3B2314]">{item.name}</h4>
                                         <p className="text-[11px] text-[#3B2314]/60">{item.role}</p>
@@ -70,4 +75,4 @@ export const Testimonials: React.FC = () => {
             </div>
         </section>
     );
-};
+}
