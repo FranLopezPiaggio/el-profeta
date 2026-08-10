@@ -1,8 +1,11 @@
 // src/app/page.tsx
-import { Navbar } from '@/ui/components/modules/Navbar';
-import { Hero } from '@/ui/components/modules/Hero';
-import { BeerCatalog } from '@/ui/components/catalog/BeerCatalog';
+import { Navbar } from '@/ui/components/layout/Navbar';
+import { Hero } from '@/ui/components/sections/home/Hero';
+import { BeerCatalog } from '@/ui/components/sections/catalog/BeerCatalog';
 import { BeerCategory } from '@/types/beers';
+import { TopGradientBubbles } from '@/ui/components/sections/choperas-eventos/TopGradientBubbles';
+import { Footer } from '@/ui/components/layout/Footer'
+import { BentoGridSection } from '@/ui/components/sections/home/BentoGridSection';
 
 interface PageProps {
     searchParams: Promise<{ categoria?: string }>;
@@ -15,9 +18,12 @@ export default async function Home({ searchParams }: PageProps) {
     return (
         <>
             <Navbar />
-            <main className="w-full mx-auto space-y-8">
+            <main className="ww-full mx-auto flex flex-col">
                 <Hero />
+                <TopGradientBubbles />
                 <BeerCatalog selectedCategory={selectedCategory} />
+                <BentoGridSection />
+                <Footer />
             </main>
         </>
     );

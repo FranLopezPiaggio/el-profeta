@@ -1,6 +1,6 @@
 // src/ui/components/catalog/BeerCatalog.tsx
-import { FilterBar } from '@/ui/components/catalog/FiltersBar';
-import { BeerGrid } from '@/ui/components/catalog/BeerGrid';
+import { FilterBar } from '@/ui/components/sections/catalog/FiltersBar';
+import { BeerGrid } from '@/ui/components/sections/catalog/BeerGrid';
 import { BeerCategory, Beer } from '@/types/beers';
 import Image from 'next/image';
 
@@ -49,9 +49,11 @@ export function BeerCatalog({ selectedCategory }: BeerCatalogProps) {
         : MOCK_BEERS.filter((beer) => beer.category === selectedCategory);
 
     return (
-        <section id="cervezas" className="min-h-screen py-16 bg-brand-green2 pt-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
+        <section
+            id="cervezas"
+            className="min-h-screen py-10 relative bg-gradient-to-b from-brand-gold via-brand-gold to-brand-gold/90"
+        >
+            <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 space-y-10">
                 <div className="text-center mx-auto space-y-3 flex items-center">
                     <h2 id="nuestras-cervezas" className="font-passion text-4xl text-white tracking-wide">
                         Nuestras Cervezas
@@ -61,14 +63,44 @@ export function BeerCatalog({ selectedCategory }: BeerCatalogProps) {
                         alt="El Profeta Logo"
                         width={100}
                         height={100}
-                        className='-mt-16'
+                        className="-mt-16 z-20"
                     />
                 </div>
 
                 <FilterBar />
                 <BeerGrid beers={filteredBeers} />
-
             </div>
         </section>
     );
-}
+};
+
+//     return (
+//         // <section id="cervezas" className="min-h-screen py-10 bg-gradient bg-brand-gold relative mt-[-40px]">
+//         <section
+//             id="cervezas"
+//             className="min-h-screen py-10 relative mt-[-50px] bg-gradient-to-b from-brand-gold/80 via-brand-gold/90 to-brand-gold/100"
+//         >
+//             {/* Difuminado superior superpuesto */}
+//             {/* <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-brand-gold/0 via-brand-gold/30 via-brand-gold/70 to-brand-gold pointer-events-none -translate-y-full" /> */}
+//             <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 space-y-10">
+
+//                 <div className="text-center mx-auto space-y-3 flex items-center ">
+//                     <h2 id="nuestras-cervezas" className="font-passion text-4xl text-white tracking-wide">
+//                         Nuestras Cervezas
+//                     </h2>
+//                     <Image
+//                         src="/logo-removebg-preview.png"
+//                         alt="El Profeta Logo"
+//                         width={100}
+//                         height={100}
+//                         className="-mt-16 z-20"
+//                     />
+//                 </div>
+
+//                 <FilterBar />
+//                 <BeerGrid beers={filteredBeers} />
+
+//             </div>
+//         </section>
+//     );
+// }

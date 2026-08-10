@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Beer, ShieldAlert } from 'lucide-react';
+import Image from 'next/image';
 
 const STORAGE_KEY = 'el_profeta_age_verified';
 
@@ -53,8 +54,14 @@ export function AgeVerificationModal() {
             <div className="relative w-full max-w-md bg-brand-cream rounded-3xl border-2 border-brand-earth/20 shadow-2xl p-6 sm:p-8 text-center space-y-6">
 
                 {/* Emblem */}
-                <div className="w-16 h-16 rounded-2xl bg-brand-earth text-brand-gold mx-auto flex items-center justify-center shadow-lg border border-brand-gold/40">
-                    <Beer className="w-8 h-8 text-brand-gold" />
+                <div className="mx-auto flex items-center justify-center">
+                    <Image
+                        src="/logo-removebg-preview.png"
+                        alt="El Profeta Logo"
+                        width={100}
+                        height={100}
+                        className=''
+                    />
                 </div>
 
                 <div>

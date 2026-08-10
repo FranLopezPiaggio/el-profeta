@@ -5,9 +5,9 @@ import {
   Russo_One,
   Squada_One,
   Passion_One
-} from 'next/font/google'; import { Navbar } from '@/ui/components/modules/Navbar';
+} from 'next/font/google'; import { Navbar } from '@/ui/components/layout/Navbar';
 import './globals.css';
-import { AgeVerificationModal } from '@/ui/components/modules/AgeVerification';
+import { AgeVerificationModal } from '@/ui/components/common/AgeVerification';
 
 // Fuentes Display (Titulares / Branding)
 const fontFredoka = Fredoka({

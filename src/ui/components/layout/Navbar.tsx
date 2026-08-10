@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { ShoppingCart } from 'lucide-react';
 
 export function Navbar() {
     return (
@@ -41,23 +42,33 @@ export function Navbar() {
                     </ul>
                 </nav>
 
-                {/* CTA Principal */}
-                <div className="hidden md:block">
-                    <Link
-                        href="#contacto"
-                        aria-label="Contactar por WhatsApp"
-                        className="group relative flex items-center justify-center w-11 h-11 bg-white rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-                    >
-                        <Image
-                            src="/whatsapp-color-svgrepo-com.svg"
-                            width={28}
-                            height={28}
-                            alt="" // Alt vacío porque el aria-label del Link ya describe la acción
-                            className="w-7 h-7 object-contain"
-                        />
-                    </Link>
-                </div>
+                <div className='flex gap-4'>
+                    <div className='mt-2'>
+                        <Link
+                            href='#chechout'
+                            aria-label='Carrito'
+                        >
+                            <ShoppingCart />
+                        </Link>
+                    </div>
 
+                    {/* CTA Principal */}
+                    <div className="hidden md:block">
+                        <Link
+                            href="#contacto"
+                            aria-label="Contactar por WhatsApp"
+                            className="group relative flex items-center justify-center w-11 h-11 bg-white rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
+                        >
+                            <Image
+                                src="/whatsapp-color-svgrepo-com.svg"
+                                width={28}
+                                height={28}
+                                alt="" // Alt vacío porque el aria-label del Link ya describe la acción
+                                className="w-7 h-7 object-contain"
+                            />
+                        </Link>
+                    </div>
+                </div>
                 {/* Placeholder para Botón Mobile (se implementará con lógica después) */}
                 <button
                     type="button"
