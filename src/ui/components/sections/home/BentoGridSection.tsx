@@ -1,35 +1,47 @@
 import { BentoCard } from '../../common/BentoCard';
-import { SectionHeader } from '../../common/SectionHeader';
+import { SectionHeader } from '@/ui/components/sections/choperas-eventos/SectionHeader';
 import { BentoItem } from '@/types/bento';
 
 const BENTO_ITEMS: BentoItem[] = [
     {
         id: '1',
-        title: 'Ingredientes Orgánicos',
-        description: 'Utilizamos solo maltas de alta calidad y lúpulos cosechados a mano.',
-        category: 'Calidad',
-        colSpan: 'md:col-span-2',
+        title: 'Lleva a El Profeta a tu Evento',
+        description: 'Servicio completo de barras móviles, tiradores de cerveza y atención personalizada para bodas, cumpleaños y eventos corporativos.',
+        category: 'Servicio Estrella',
+        imageSrc: '/friends-beer2.jpg', // Reemplaza con tu ruta
+        colSpan: 'col-span-1 md:col-span-2 lg:col-span-2',
+        rowSpan: 'row-span-2',
+        ctaText: 'Cotizar Evento',
+        ctaLink: '#cotizar',
     },
     {
         id: '2',
-        title: 'Proceso Artesanal',
-        description: 'Fermentación lenta respetando los tiempos de la naturaleza.',
-        category: 'Tradición',
-        colSpan: 'md:col-span-1',
+        title: 'Alquiler de Barriles y Choperas',
+        description: 'Equipos de frío listos para usar con barriles de 20L, 30L y 50L. Instalación rápida en tu fiesta.',
+        category: 'Alquiler Directo',
+        imageSrc: '/keg3.jpg', // Reemplaza con tu ruta
+        colSpan: 'col-span-1 md:col-span-2 lg:col-span-2',
+        rowSpan: 'row-span-1',
+        ctaText: 'Ver Equipos y Precios',
     },
     {
         id: '3',
-        title: 'Ediciones Limitadas',
-        description: 'Lotes especiales cocinados exclusivamente para cada estación del año.',
-        category: 'Exclusivo',
-        colSpan: 'md:col-span-1',
+        title: 'Ventas al por Mayor',
+        description: 'Abastecimiento continuo para bares, restaurantes y distribuidores con precios escalonados.',
+        category: 'B2B',
+        imageSrc: '/hero-bg.jpg',
+        colSpan: 'col-span-1 md:col-span-1 lg:col-span-1',
+        rowSpan: 'row-span-1',
+        ctaText: 'Catálogo Mayorista',
     },
     {
         id: '4',
-        title: 'Sustentabilidad',
-        description: 'Reutilizamos el 100% de nuestros residuos orgánicos como alimento de ganado.',
-        category: 'Impacto',
-        colSpan: 'md:col-span-2',
+        title: '+500 Eventos Impulsados',
+        description: 'La cerveza perfecta para acompañar tus mejores momentos.',
+        category: 'Comunidad',
+        imageSrc: '/chopera-1.jpg', // Reemplaza con tu ruta
+        colSpan: 'col-span-1 md:col-span-1 lg:col-span-1',
+        rowSpan: 'row-span-1',
     },
 ];
 
