@@ -8,6 +8,7 @@ import {
 } from 'next/font/google'; import { Navbar } from '@/ui/components/layout/Navbar';
 import './globals.css';
 import { AgeVerificationModal } from '@/ui/components/common/AgeVerification';
+import { CartDrawer } from '@/ui/components/cart/CartDrawer';
 
 // Fuentes Display (Titulares / Branding)
 const fontFredoka = Fredoka({
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1 w-full">
           {children}
           <AgeVerificationModal />
+          <CartDrawer />
         </main>
       </body>
     </html>

@@ -8,6 +8,7 @@ export interface Beer {
     abv: number; // Alcohol by Volume (%)
     ibu: number; // International Bitterness Units
     price: number;
+    style?: string;
     imageSrc: string;
     isPopular?: boolean;
 }

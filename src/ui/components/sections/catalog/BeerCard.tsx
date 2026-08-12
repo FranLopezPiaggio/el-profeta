@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Beer } from '@/types/beers';
+import { AddToCartTrigger } from '@/ui/components/cart/AddToCartTrigger';
 
 interface BeerCardProps {
     beer: Beer;
@@ -54,7 +55,23 @@ export function BeerCard({ beer }: BeerCardProps) {
                         </span>
                     </div>
 
-                    <button
+                    <AddToCartTrigger
+                        product={{
+                            id: beer.id,
+                            name: beer.name,
+                            style: beer.style || 'Cerveza Artesanal',
+                            price: beer.price,
+                            image: beer.imageSrc,
+                            format: 'Lata 473ml'
+                        }}
+                        aria-label={`Añadir ${beer.name} al carrito`}
+                        className="bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-white p-2.5 rounded-full transition-colors active:scale-95 flex items-center justify-center"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </AddToCartTrigger>
+                    {/* <button
                         type="button"
                         aria-label={`Añadir ${beer.name} al carrito`}
                         className="bg-brand-green/10 text-brand-green hover:bg-brand-green hover:text-white p-2.5 rounded-full transition-colors active:scale-95"
@@ -62,7 +79,7 @@ export function BeerCard({ beer }: BeerCardProps) {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                    </button>
+                    </button> */}
                 </div>
             </div>
         </article>

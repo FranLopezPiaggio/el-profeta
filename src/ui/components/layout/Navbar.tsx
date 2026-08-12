@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
 import { ContactTrigger } from '../modals/ContactTrigger';
+import { CartButton } from '@/ui/components/cart/CartButton';
 
 export function Navbar() {
     return (
@@ -45,12 +46,13 @@ export function Navbar() {
 
                 <div className='flex gap-4'>
                     <div className='mt-2'>
-                        <Link
+                        {/* <Link
                             href='#chechout'
                             aria-label='Carrito'
                         >
-                            <ShoppingCart />
-                        </Link>
+                             <ShoppingCart /> 
+                        </Link> */}
+                        <CartButton />
                     </div>
 
                     {/* CTA Principal */}
