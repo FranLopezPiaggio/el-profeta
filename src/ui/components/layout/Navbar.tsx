@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
+import { ContactTrigger } from '../modals/ContactTrigger';
 
 export function Navbar() {
     return (
@@ -54,11 +55,12 @@ export function Navbar() {
 
                     {/* CTA Principal */}
                     <div className="hidden md:block">
-                        <Link
+                        {/* <Link
                             href="#contacto"
                             aria-label="Contactar por WhatsApp"
-                            className="group relative flex items-center justify-center w-11 h-11 bg-white rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
-                        >
+                            className="group relative flex items-center justify-center w-11 h-11 bg-brand-bone-white rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
+                        > */}
+                        <ContactTrigger className="group relative flex items-center justify-center w-11 h-11 bg-brand-bone-white rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
                             <Image
                                 src="/whatsapp-color-svgrepo-com.svg"
                                 width={28}
@@ -66,7 +68,8 @@ export function Navbar() {
                                 alt="" // Alt vacío porque el aria-label del Link ya describe la acción
                                 className="w-7 h-7 object-contain"
                             />
-                        </Link>
+                        </ContactTrigger>
+                        {/* </Link> */}
                     </div>
                 </div>
                 {/* Placeholder para Botón Mobile (se implementará con lógica después) */}
@@ -80,6 +83,6 @@ export function Navbar() {
                     </svg>
                 </button>
             </div>
-        </header>
+        </header >
     );
 }

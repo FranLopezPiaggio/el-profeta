@@ -1,6 +1,7 @@
 import { BentoCard } from '../../common/BentoCard';
 import { SectionHeader } from '@/ui/components/sections/choperas-eventos/SectionHeader';
 import { BentoItem } from '@/types/bento';
+import { ContactTrigger } from '@/ui/components/modals/ContactTrigger';
 
 const BENTO_ITEMS: BentoItem[] = [
     {
@@ -12,7 +13,6 @@ const BENTO_ITEMS: BentoItem[] = [
         colSpan: 'col-span-1 md:col-span-2 lg:col-span-2 lg:col-start-3 lg:row-start-1',
         rowSpan: 'row-span-1 md:row-span-1 lg:row-span-2',
         ctaText: 'Cotizar Evento',
-        ctaLink: '#cotizar',
     },
     {
         id: '3',
@@ -44,7 +44,6 @@ const BENTO_ITEMS: BentoItem[] = [
         rowSpan: 'row-span-1 md:row-span-2 lg:row-span-4',
     },
 ];
-
 export function BentoGridSection() {
     return (
         <section id="choperas-eventos" className="py-20 bg-brand-green2 relative">
@@ -57,18 +56,18 @@ export function BentoGridSection() {
                     subtitle="Lleva el Profeta a tu evento, cumpleaños o fiesta corporativa."
                 />
 
-                {/* Bento Grid layout de 4 columnas y 6 filas */}
+                {/* Bento Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 auto-rows-[120px] gap-6">
                     {BENTO_ITEMS.map((item) => (
                         <BentoCard key={item.id} {...item} />
                     ))}
                 </div>
 
-                {/* CTA (Call to Action) */}
+                {/* CTA Principal de la Sección */}
                 <div className="text-center pt-4">
-                    <button className="px-8 py-3.5 bg-brand-gold text-brand-black font-semibold rounded-xl shadow-lg hover:bg-amber-400 active:scale-95 transition-all duration-200">
+                    <ContactTrigger className="px-8 py-3.5 bg-brand-gold text-brand-black font-body font-bold rounded-xl shadow-lg hover:bg-amber-400 active:scale-95 transition-all duration-200">
                         Quiero El Profeta en mi evento
-                    </button>
+                    </ContactTrigger>
                 </div>
 
             </div>

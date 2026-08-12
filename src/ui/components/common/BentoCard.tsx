@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { BentoItem } from '@/types/bento';
+import { ContactTrigger } from '@/ui/components/modals/ContactTrigger';
 
 export function BentoCard({
     title,
@@ -8,8 +9,7 @@ export function BentoCard({
     imageSrc,
     colSpan = 'col-span-1',
     rowSpan = 'row-span-1',
-    ctaText,
-    ctaLink
+    ctaText
 }: BentoItem) {
     return (
         <article
@@ -25,12 +25,11 @@ export function BentoCard({
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {/* Capa de degradado oscuro para contrastar con el texto blanco */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
                 </div>
             )}
 
-            {/* Contenido Superior (z-10 asegura que quede sobre la imagen) */}
+            {/* Contenido Superior */}
             <div className="relative z-10">
                 {category && (
                     <span className="text-xs font-semibold uppercase tracking-wider text-brand-gold">
@@ -40,24 +39,17 @@ export function BentoCard({
                 <h3 className="mt-2 font-passion text-2xl text-white tracking-wide">
                     {title}
                 </h3>
-                <p className="mt-2 text-sm text-stone-300 leading-relaxed">
+                <p className="mt-2 text-sm text-stone-300 leading-relaxed font-body">
                     {description}
                 </p>
             </div>
 
-            {/* Detalle visual o CTA inferior (relative z-10) */}
-            <div className="relative z-10 mt-6 flex items-center text-xs text-brand-gold font-medium">
-                {ctaText ? (
-                    <a href={ctaLink || '#'} className="inline-flex items-center hover:underline">
-                        <span>{ctaText}</span>
-                        <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                    </a>
-                ) : (
-                    <div className="flex items-center">
-                        <span>Saber más</span>
-                        <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-                    </div>
-                )}
+            {/* CTA Inferior envuelto en ContactTrigger */}
+            <div className="relative z-10 mt-6">
+                <ContactTrigger className="inline-flex items-center text-xs text-brand-gold font-body font-bold hover:underline">
+                    <span>{ctaText || 'Saber más'}</span>
+                    <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
+                </ContactTrigger>
             </div>
         </article>
     );

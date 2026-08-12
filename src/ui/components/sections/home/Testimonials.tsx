@@ -1,7 +1,46 @@
 import React from 'react';
 import Image from 'next/image';
 import { Star, Quote, Beer } from 'lucide-react';
-import { TESTIMONIALS } from '@/data/kegs';
+
+interface Testimonial {
+    id: number;
+    name: string;
+    role: string;
+    avatar: string;
+    rating: number;
+    comment: string;
+    beerFav: string;
+}
+
+const TESTIMONIALS: Testimonial[] = [
+    {
+        id: 1,
+        name: "Lucas Benítez",
+        role: "Organizador de Eventos",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+        rating: 5,
+        comment: "Pedimos tres barriles para el aniversario de la empresa y fue un éxito rotundo. La frescura con la que llega la cerveza tirada es de otro nivel. Sin duda, pedir barriles de El Profeta ya es tradición fija.",
+        beerFav: "IPA"
+    },
+    {
+        id: 2,
+        name: "Mariana Costa",
+        role: "Cliente Frecuente",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
+        rating: 5,
+        comment: "Es la cerveza más rica y equilibrada que probé en el último tiempo. Suave, refrescante y perfecta para cualquier junta de fin de semana con amigos.",
+        beerFav: "Blonde"
+    },
+    {
+        id: 3,
+        name: "Gonzalo Fernández",
+        role: "Sommelier de Cerveza",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+        rating: 5,
+        comment: "Cuerpo, aroma y un tostado impecable. La calidad de los ingredientes se nota desde el primer sorbo. Si te gusta la cerveza de verdad, tenés que probar esta Stout.",
+        beerFav: "Stout"
+    }
+];
 
 export function Testimonials() {
     return (
@@ -10,14 +49,14 @@ export function Testimonials() {
 
                 {/* Header */}
                 <div className="text-center max-w-2xl mx-auto mb-14">
-                    <div className="inline-flex items-center gap-2 text-[#7C9031] font-bold text-xs uppercase tracking-widest bg-[#7C9031]/15 px-3.5 py-1.5 rounded-full mb-3">
+                    <div className="inline-flex items-center gap-2 text-color-brand-green2 font-body text-xs uppercase tracking-widest bg-[#7C9031]/15 px-3.5 py-1.5 rounded-full mb-3">
                         <Beer className="w-3.5 h-3.5 text-[#3B2314]" />
                         <span>Comunidad & Opiniones</span>
                     </div>
-                    <h2 className="font-serif text-3xl sm:text-4xl font-black text-[#3B2314] tracking-tight">
+                    <h2 className="font-passion text-3xl sm:text-4xl font-black text-brand-gold tracking-wide">
                         Lo que Dicen los Profetas
                     </h2>
-                    <p className="mt-2 text-sm sm:text-base text-[#3B2314]/70">
+                    <p className="mt-2 text-sm sm:text-base font-body text-brand-earth/80">
                         Experiencias reales de clientes, organizadores de eventos y amantes de la buena cerveza.
                     </p>
                 </div>
@@ -39,7 +78,7 @@ export function Testimonials() {
                                     ))}
                                 </div>
 
-                                <p className="text-sm text-[#3B2314]/85 leading-relaxed italic">
+                                <p className="text-sm font-body text-brand-black/80 leading-relaxed italic">
                                     &ldquo;{item.comment}&rdquo;
                                 </p>
                             </div>

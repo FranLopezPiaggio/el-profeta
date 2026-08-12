@@ -25,7 +25,7 @@ export function Footer() {
                                 El Profeta
                             </span>
                         </div>
-                        <p className="text-sm text-[#F3EBDD]/70 leading-relaxed">
+                        <p className="text-sm font-body text-[#F3EBDD]/70 leading-relaxed">
                             Cerveza artesanal elaborada con pasión. Llevamos la mejor experiencia de tirada directa a tus eventos y reuniones.
                         </p>
                     </div>
@@ -35,7 +35,7 @@ export function Footer() {
                         <h4 className="font-passion text-base font-bold text-white tracking-wide">
                             Servicios & Eventos
                         </h4>
-                        <ul className="space-y-2.5 text-sm text-[#F3EBDD]/70">
+                        <ul className="space-y-2.5 font-body text-sm text-[#F3EBDD]/70">
                             <li>
                                 <Link href="#eventos" className="hover:text-[#D98A29] transition-colors">
                                     Alquiler de Barriles & Choperas
@@ -64,7 +64,7 @@ export function Footer() {
                         <h4 className="font-passion text-base font-bold text-white tracking-wide">
                             Contacto
                         </h4>
-                        <ul className="space-y-3 text-sm text-[#F3EBDD]/70">
+                        <ul className="space-y-3 text-sm font-body text-[#F3EBDD]/70">
                             <li className="flex items-center gap-2.5">
                                 <Phone className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
                                 <span>+54 (11) 1234-5678</span>
@@ -85,7 +85,7 @@ export function Footer() {
                         <h4 className="font-passion text-base font-bold text-white tracking-wide">
                             Atención a Eventos
                         </h4>
-                        <p className="text-xs text-[#F3EBDD]/60">
+                        <p className="text-xs font-body text-[#F3EBDD]/60">
                             Lunes a Sábados: 09:00 - 20:00 hs.<br />
                             Reserva de chopperas con 48hs de anticipación.
                         </p>

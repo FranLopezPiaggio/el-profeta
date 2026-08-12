@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ScaleIn } from '../../common/ScaleIn';
 
 export function Hero() {
     return (
@@ -32,11 +33,13 @@ export function Hero() {
                             <span className="text-sm">☀️</span> Cerveza Fresca & Artesanal
                         </span> */}
 
-                        <h1 className="font-passion text-[clamp(5rem,1.5vw,1.65rem)] font-bold text-brand-green leading-tight drop-shadow-sm">
-                            Sabor real para días de <span className="text-brand-gold">sol y amigos.</span>
+                        <h1 className="font-passion text-[clamp(2.5rem,6vw,5rem)] font-bold text-brand-green leading-[0.85] drop-shadow-sm">
+                            <span className="block">Sabor real</span>
+                            <span className="block">para dias de</span>
+                            <span className="text-brand-gold">sol y amigos.</span>
                         </h1>
 
-                        <p className="font-fredoka text-lg text-stone-700 max-w-xl leading-relaxed font-medium">
+                        <p className="font-fredoka text-lg text-brand-earth max-w-xl leading-relaxed font-medium bg-brand-bone-white/65 backdrop-blur-md border border-brand-earth/5 p-4 sm:p-6 rounded-2xl shadow-sm">
                             Elaboramos lotes pequeños con ingredientes naturales y mucha paciencia. Ven a disfrutar de nuestro patio cervecero o llévate tus estilos favoritos a casa.
                         </p>
 
@@ -52,6 +55,7 @@ export function Hero() {
                     {/* Columna Derecha: Imagen del Producto Centrada & Responsive */}
                     <div className="relative w-full h-[350px] sm:h-[450px] lg:h-[520px] flex items-center justify-center lg:justify-end">
                         <div className="relative w-full h-full max-w-lg transition-transform duration-300 hover:scale-105">
+                            {/* <ScaleIn> */}
                             <Image
                                 src="/latas-el-profeta.png"
                                 alt="Latas cerveza artesanal El Profeta"
@@ -60,10 +64,11 @@ export function Hero() {
                                 sizes="(max-width: 1024px) 100vw, 50vw"
                                 className="object-contain object-center lg:object-right drop-shadow-2xl"
                             />
+                            {/* </ScaleIn> */}
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </section >
     );
 }
