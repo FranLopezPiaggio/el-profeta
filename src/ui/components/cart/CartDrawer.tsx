@@ -43,6 +43,17 @@ export function CartDrawer() {
   const subtotal = getSubtotal();
   const totalItems = getTotalItems();
 
+  const handleNavigateToCervezas = () => {
+    // 1. Cierra el carrito
+    closeCart();
+
+    // 2. Busca la sección y hace scroll hasta ella
+    const element = document.getElementById('cervezas');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return createPortal(
     <div className="fixed inset-0 z-[100] overflow-hidden">
 
@@ -60,8 +71,14 @@ export function CartDrawer() {
           {/* 1. HEADER DEL DRAWER */}
           <div className="p-6 bg-white border-b border-brand-green2/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-green2 text-brand-gold flex items-center justify-center shadow-sm">
-                <ShoppingBag className="w-5 h-5" />
+              <div className="w-20 h-20 text-brand-gold flex items-center justify-center mt-10">
+                <Image
+                  src="/profeta-carrito-removebg-preview.png"
+                  alt="El Profeta Carrito"
+                  width={100}
+                  height={100}
+                  className="-mt-10 z-20"
+                />
               </div>
               <div>
                 <h2 className="font-passion text-2xl text-brand-green2 leading-none">
@@ -100,7 +117,7 @@ export function CartDrawer() {
                 </div>
                 <button
                   type="button"
-                  onClick={closeCart}
+                  onClick={handleNavigateToCervezas}
                   className="font-body text-xs font-bold text-brand-green2 underline hover:text-brand-black transition-colors pt-2 cursor-pointer"
                 >
                   Ir a ver cervezas
