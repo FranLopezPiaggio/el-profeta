@@ -1,7 +1,7 @@
 // src/middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveSlug } from '@/shared/middleware/tenant-resolver';
-import { createMiddlewareClient } from '@/shared/infrastructure/supabase/server';
+import { createMiddlewareClient } from '@/shared/infrastructure/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
   // 1. Resolver el Tenant desde subdominio/ruta
@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
         query = query.eq('tenant_id', tenantId);
       }
 
-      const { data: tenantUser } = await query.maybeSingle();
+      const { data: tenantUser } = await query.limit(1).maybeSingle();
 
       // Si no es admin registrado en tenant_users, denegar acceso
       if (!tenantUser) {
