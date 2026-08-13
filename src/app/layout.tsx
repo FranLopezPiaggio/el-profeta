@@ -5,7 +5,7 @@ import {
   Russo_One,
   Squada_One,
   Passion_One
-} from 'next/font/google'; import { Navbar } from '@/ui/components/layout/Navbar';
+} from 'next/font/google';
 import './globals.css';
 import { AgeVerificationModal } from '@/ui/components/common/AgeVerification';
 import { CartDrawer } from '@/ui/components/cart/CartDrawer';

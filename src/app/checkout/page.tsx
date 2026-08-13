@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Beer, ShieldCheck, Send, Trash2, MapPin, Phone, Mail, User, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Beer, ShieldCheck, Send, MapPin, Phone, Mail, User, MessageSquare } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 
 export default function CheckoutPage() {

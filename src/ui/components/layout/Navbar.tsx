@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart } from 'lucide-react';
 import { ContactTrigger } from '../modals/ContactTrigger';
 import { CartButton } from '@/ui/components/cart/CartButton';
 

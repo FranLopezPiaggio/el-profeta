@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Beer } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ArrowRight, Beer } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 
 export function CartDrawer() {

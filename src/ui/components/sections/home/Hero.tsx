@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ScaleIn } from '../../common/ScaleIn';
 
 export function Hero() {
     return (

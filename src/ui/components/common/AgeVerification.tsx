@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Beer, ShieldAlert } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import Image from 'next/image';
 
 const STORAGE_KEY = 'el_profeta_age_verified';
