@@ -7,7 +7,7 @@ const BENTO_ITEMS: BentoItem[] = [
     {
         id: '1',
         title: 'Lleva a El Profeta a tu Evento',
-        description: 'Servicio completo de barras móviles, tiradores de cerveza y atención personalizada para bodas, cumpleaños y eventos corporativos.',
+        description: 'Equipá tu fiesta o reunión con nuestras choperas y barriles. Cerveza artesanal bien helada, fácil de tirar y lista para compartir.',
         category: 'Servicio Estrella',
         imageSrc: '/friends-beer2.jpg',
         colSpan: 'col-span-1 md:col-span-2 lg:col-span-2 lg:col-start-3 lg:row-start-1',

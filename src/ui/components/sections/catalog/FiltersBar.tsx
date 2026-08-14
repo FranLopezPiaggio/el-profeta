@@ -11,9 +11,9 @@ interface FilterOption {
 const CATEGORIES: FilterOption[] = [
     { label: 'Todas', value: 'todos' },
     { label: 'IPAs', value: 'ipa' },
-    { label: 'Golden & Lager', value: 'golden' },
-    { label: 'Honey & Sweet', value: 'honey' },
-    { label: 'Negras & Stout', value: 'stout' },
+    { label: 'Rubias', value: 'rubias' },
+    { label: 'Negras', value: 'negras' },
+    { label: 'Rojas', value: 'rojas' },
 ];
 
 export function FilterBar() {

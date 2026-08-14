@@ -1,4 +1,4 @@
-export type BeerCategory = 'todos' | 'ipa' | 'golden' | 'honey' | 'stout';
+export type BeerCategory = 'todos' | 'ipa' | 'rubias' | 'negras' | 'rojas';
 
 export interface Beer {
     id: string;

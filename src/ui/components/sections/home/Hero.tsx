@@ -34,12 +34,12 @@ export function Hero() {
 
                         <h1 className="font-passion text-[clamp(2.5rem,6vw,5rem)] font-bold text-brand-green leading-[0.85] drop-shadow-sm">
                             <span className="block">Sabor real</span>
-                            <span className="block">para dias de</span>
-                            <span className="text-brand-gold">sol y amigos.</span>
+                            <span className="block">para compartir</span>
+                            <span className="text-brand-gold">entre amigos.</span>
                         </h1>
 
                         <p className="font-fredoka text-lg text-brand-earth max-w-xl leading-relaxed font-medium bg-brand-bone-white/65 backdrop-blur-md border border-brand-earth/5 p-4 sm:p-6 rounded-2xl shadow-sm">
-                            Elaboramos lotes pequeños con ingredientes naturales y mucha paciencia. Ven a disfrutar de nuestro patio cervecero o llévate tus estilos favoritos a casa.
+                            Elaboramos nuestra cerveza con ingredientes naturales, pasión y mucha paciencia. Encontranos en los mejores bares y comercios, o llevá nuestras choperas y latas a tu próximo evento.
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto pt-2">

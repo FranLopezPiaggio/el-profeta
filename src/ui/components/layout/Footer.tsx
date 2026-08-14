@@ -75,7 +75,7 @@ export function Footer() {
                             </li>
                             <li className="flex items-center gap-2.5">
                                 <MapPin className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
-                                <span>Fábrica & Taproom, Argentina</span>
+                                <span>Berazategui</span>
                             </li>
                         </ul>
                     </div>
@@ -86,7 +86,6 @@ export function Footer() {
                             Atención a Eventos
                         </h4>
                         <p className="text-xs font-body text-[#F3EBDD]/60">
-                            Lunes a Sábados: 09:00 - 20:00 hs.<br />
                             Reserva de chopperas con 48hs de anticipación.
                         </p>
                         <div className="pt-2">
