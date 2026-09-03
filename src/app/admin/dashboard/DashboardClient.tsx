@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useState, useTransition } from 'react';
 import {
     ShoppingBag,
@@ -12,20 +13,155 @@ import {
     Search,
     Bell,
     ChevronRight,
-    Filter,
     ArrowLeft,
-    LogOut
+    LogOut,
+    RefreshCcw,
+    Wallet,
+    Beer,
+    Receipt,
 } from 'lucide-react';
 import { logoutAction } from '@/app/admin/login/actions';
 
-type TabType = 'orders' | 'leads' | 'catalog' | 'stock';
+// ============================================================
+// TIPOS — datos del Sheet (SSOT del cliente) y del canal web
+// ============================================================
+
+export interface SheetData {
+    stockGeneral: Record<string, number>;
+    usuarios: Record<string, { stock: Record<string, number>; stockSinEtiqueta: Record<string, number> }>;
+    clientes: { nombre: string; deuda: number; pagado: number }[];
+    barrilesDisponibles: { id: string; tipo: string; tamano: string; serie: string }[];
+    totalIngresadoSheet: number;
+    efectivoSheet: number;
+    transferenciaSheet: number;
+    paraProfetaSheet: number;
+    cicloFechaCorte: number;
+    profetaInicialCiclo: number;
+    configuracion: Record<string, unknown>;
+    historialStock: { fecha: string; usuario: string; estilos: Record<string, number>; tipo: string }[];
+    historialTransferencias: { fecha: string; desde: string; hacia: string; estilos: Record<string, number>; tipo: string }[];
+}
+
+export interface GastosData {
+    gastos: { idFila: string; item: string; monto: number; obs: string; fecha: string }[];
+}
+
+export interface OrderRow {
+    id: string;
+    orderNumber: number;
+    customerName: string;
+    total: number;
+    status: string;
+    createdAt: string;
+    items: { title: string; quantity: number; price: number }[];
+}
+
+export interface LeadRow {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    eventType: string;
+    status: string;
+    createdAt: string;
+}
+
+export interface ProductRow {
+    id: string;
+    title: string;
+    price: number;
+    stock: number;
+    isActive: boolean;
+}
 
 interface DashboardClientProps {
     userEmail: string;
+    sheet: SheetData | null;
+    gastosData: GastosData | null;
+    orders: OrderRow[];
+    leads: LeadRow[];
+    products: ProductRow[];
+    pendingCount: number;
 }
 
-export function DashboardClient({ userEmail }: DashboardClientProps) {
-    const [activeTab, setActiveTab] = useState<TabType>('orders');
+type TabType = 'orders' | 'leads' | 'catalog' | 'stock' | 'clientes' | 'barriles' | 'gastos';
+
+const TABS: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { id: 'orders', label: 'Órdenes Web', icon: ShoppingBag },
+    { id: 'leads', label: 'Leads & Eventos', icon: Users },
+    { id: 'catalog', label: 'Catálogo Web', icon: Package },
+    { id: 'stock', label: 'Stock', icon: Boxes },
+    { id: 'clientes', label: 'Clientes', icon: Wallet },
+    { id: 'barriles', label: 'Barriles', icon: Beer },
+    { id: 'gastos', label: 'Gastos', icon: Receipt },
+];
+
+const TAB_TITLES: Record<TabType, string> = {
+    orders: 'Órdenes del Canal Web',
+    leads: 'Consultas y Alquileres',
+    catalog: 'Catálogo de Productos',
+    stock: 'Stock General y por Usuario',
+    clientes: 'Cuenta Corriente de Clientes',
+    barriles: 'Barriles Disponibles',
+    gastos: 'Gastos del Ciclo',
+};
+
+const ORDER_STATUS: Record<string, { label: string; cls: string }> = {
+    pending: { label: 'Pendiente', cls: 'bg-brand-gold/20 text-brand-black' },
+    completed: { label: 'Completada', cls: 'bg-brand-green2/10 text-brand-green2' },
+    cancelled: { label: 'Cancelada', cls: 'bg-red-100 text-red-700' },
+    expired: { label: 'Vencida', cls: 'bg-brand-black/10 text-brand-black/60' },
+};
+
+const LEAD_STATUS: Record<string, string> = {
+    new: 'Nueva',
+    contacted: 'Contactada',
+    qualified: 'Calificada',
+    closed: 'Cerrada',
+    cancelled: 'Cancelada',
+};
+
+const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+const fmtDate = (iso: string) =>
+    iso ? new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '-';
+
+// ============================================================
+// HELPERS DE RENDER
+// ============================================================
+
+function DataTable({ headers, children }: { headers: string[]; children: React.ReactNode }) {
+    return (
+        <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm font-body">
+                <thead>
+                    <tr className="border-b border-brand-green2/10 text-xs font-bold uppercase tracking-wider text-brand-black/50">
+                        {headers.map((h) => (
+                            <th key={h} className="pb-3">{h}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-brand-green2/5">{children}</tbody>
+            </table>
+        </div>
+    );
+}
+
+function Empty({ title, sub }: { title: string; sub?: string }) {
+    return (
+        <div className="py-8 text-center space-y-2">
+            <p className="font-bold text-sm text-brand-black">{title}</p>
+            {sub && <p className="text-xs text-brand-black/50">{sub}</p>}
+        </div>
+    );
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+
+export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, products, pendingCount }: DashboardClientProps) {
+    const router = useRouter();
+    const [activeTab, setActiveTab] = useState<TabType>('stock');
     const [isPending, startTransition] = useTransition();
 
     const handleLogout = () => {
@@ -33,6 +169,18 @@ export function DashboardClient({ userEmail }: DashboardClientProps) {
             await logoutAction();
         });
     };
+
+    const handleRefresh = () => {
+        startTransition(() => router.refresh());
+    };
+
+    // Métricas reales del Sheet
+    const deudaTotal = (sheet?.clientes || []).reduce((a, c) => a + (Number(c.deuda) || 0), 0);
+    const clientesCount = sheet?.clientes?.length || 0;
+    const gastosTotal = (gastosData?.gastos || []).reduce((a, g) => a + (Number(g.monto) || 0), 0);
+
+    const stockGeneral = sheet?.stockGeneral || {};
+    const usuarios = sheet?.usuarios || {};
 
     return (
         <div className="min-h-screen w-full bg-brand-bone-white flex font-body text-brand-black">
@@ -64,61 +212,22 @@ export function DashboardClient({ userEmail }: DashboardClientProps) {
 
                     {/* Menú NAVEGACIÓN */}
                     <nav className="space-y-1">
-                        <button
-                            onClick={() => setActiveTab('orders')}
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'orders'
-                                ? 'bg-brand-green2 text-brand-bone-white'
-                                : 'text-brand-black/70 hover:bg-brand-bone-white hover:text-brand-black'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <ShoppingBag className="w-4 h-4" />
-                                <span>Órdenes</span>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 opacity-50 ${activeTab === 'orders' ? 'inline' : 'hidden'}`} />
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('leads')}
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'leads'
-                                ? 'bg-brand-green2 text-brand-bone-white'
-                                : 'text-brand-black/70 hover:bg-brand-bone-white hover:text-brand-black'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <Users className="w-4 h-4" />
-                                <span>Leads & Eventos</span>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 opacity-50 ${activeTab === 'leads' ? 'inline' : 'hidden'}`} />
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('catalog')}
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'catalog'
-                                ? 'bg-brand-green2 text-brand-bone-white'
-                                : 'text-brand-black/70 hover:bg-brand-bone-white hover:text-brand-black'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <Package className="w-4 h-4" />
-                                <span>Catálogo</span>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 opacity-50 ${activeTab === 'catalog' ? 'inline' : 'hidden'}`} />
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('stock')}
-                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${activeTab === 'stock'
-                                ? 'bg-brand-green2 text-brand-bone-white'
-                                : 'text-brand-black/70 hover:bg-brand-bone-white hover:text-brand-black'
-                                }`}
-                        >
-                            <div className="flex items-center gap-3">
-                                <Boxes className="w-4 h-4" />
-                                <span>Stock / Barriles</span>
-                            </div>
-                            <ChevronRight className={`w-4 h-4 opacity-50 ${activeTab === 'stock' ? 'inline' : 'hidden'}`} />
-                        </button>
+                        {TABS.map(({ id, label, icon: Icon }) => (
+                            <button
+                                key={id}
+                                onClick={() => setActiveTab(id)}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${activeTab === id
+                                    ? 'bg-brand-green2 text-brand-bone-white'
+                                    : 'text-brand-black/70 hover:bg-brand-bone-white hover:text-brand-black'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Icon className="w-4 h-4" />
+                                    <span>{label}</span>
+                                </div>
+                                <ChevronRight className={`w-4 h-4 opacity-50 ${activeTab === id ? 'inline' : 'hidden'}`} />
+                            </button>
+                        ))}
                     </nav>
                 </div>
 
@@ -160,10 +269,7 @@ export function DashboardClient({ userEmail }: DashboardClientProps) {
                 <header className="h-20 bg-white border-b border-brand-green2/10 px-6 lg:px-10 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-4">
                         <h1 className="font-passion text-3xl text-brand-green2 tracking-wide">
-                            {activeTab === 'orders' && 'Gestión de Órdenes'}
-                            {activeTab === 'leads' && 'Consultas y Alquileres'}
-                            {activeTab === 'catalog' && 'Catálogo de Productos'}
-                            {activeTab === 'stock' && 'Control de Stock y Barriles'}
+                            {TAB_TITLES[activeTab]}
                         </h1>
                     </div>
 
@@ -186,42 +292,50 @@ export function DashboardClient({ userEmail }: DashboardClientProps) {
 
                 {/* CONTAINER */}
                 <div className="p-6 lg:p-10 space-y-8 max-w-7xl w-full mx-auto">
-                    {/* METRICS */}
+                    {/* METRICS — reales, del Sheet y del canal web */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         <div className="bg-white p-6 rounded-2xl border border-brand-green2/10 shadow-sm space-y-2">
                             <div className="flex items-center justify-between text-brand-black/60">
-                                <span className="text-xs font-bold uppercase tracking-wider">Ventas del Mes</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">Ventas del Ciclo</span>
                                 <TrendingUp className="w-4 h-4 text-brand-green2" />
                             </div>
-                            <p className="font-passion text-3xl text-brand-green2">$1.240.000</p>
-                            <p className="text-[11px] text-brand-black/50 font-medium">+12% respecto al mes anterior</p>
+                            <p className="font-passion text-3xl text-brand-green2">
+                                {sheet ? fmt.format(sheet.totalIngresadoSheet || 0) : '—'}
+                            </p>
+                            <p className="text-[11px] text-brand-black/50 font-medium">
+                                {sheet ? `${fmt.format(sheet.efectivoSheet || 0)} efectivo · ${fmt.format(sheet.transferenciaSheet || 0)} transf.` : 'Sin datos del Sheet'}
+                            </p>
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl border border-brand-green2/10 shadow-sm space-y-2">
                             <div className="flex items-center justify-between text-brand-black/60">
-                                <span className="text-xs font-bold uppercase tracking-wider">Órdenes Activas</span>
-                                <ShoppingBag className="w-4 h-4 text-brand-green2" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Para Profeta</span>
+                                <Wallet className="w-4 h-4 text-brand-green2" />
                             </div>
-                            <p className="font-passion text-3xl text-brand-green2">18</p>
-                            <p className="text-[11px] text-brand-black/50 font-medium">5 pendientes de despacho</p>
+                            <p className="font-passion text-3xl text-brand-green2">
+                                {sheet ? fmt.format(sheet.paraProfetaSheet || 0) : '—'}
+                            </p>
+                            <p className="text-[11px] text-brand-black/50 font-medium">Acumulado del ciclo</p>
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl border border-brand-green2/10 shadow-sm space-y-2">
                             <div className="flex items-center justify-between text-brand-black/60">
-                                <span className="text-xs font-bold uppercase tracking-wider">Solicitudes Eventos</span>
+                                <span className="text-xs font-bold uppercase tracking-wider">Deuda Clientes</span>
                                 <Users className="w-4 h-4 text-brand-green2" />
                             </div>
-                            <p className="font-passion text-3xl text-brand-green2">7</p>
-                            <p className="text-[11px] text-brand-black/50 font-medium">3 alquileres de barril nuevos</p>
+                            <p className="font-passion text-3xl text-brand-green2">
+                                {sheet ? fmt.format(deudaTotal) : '—'}
+                            </p>
+                            <p className="text-[11px] text-brand-black/50 font-medium">{clientesCount} clientes en cuenta corriente</p>
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl border border-brand-green2/10 shadow-sm space-y-2">
                             <div className="flex items-center justify-between text-brand-black/60">
-                                <span className="text-xs font-bold uppercase tracking-wider">Barriles Disponibles</span>
-                                <Boxes className="w-4 h-4 text-brand-green2" />
+                                <span className="text-xs font-bold uppercase tracking-wider">Órdenes Web Pendientes</span>
+                                <ShoppingBag className="w-4 h-4 text-brand-green2" />
                             </div>
-                            <p className="font-passion text-3xl text-brand-green2">42 / 50</p>
-                            <p className="text-[11px] text-brand-black/50 font-medium">Stock saludable de IPA y Blonde</p>
+                            <p className="font-passion text-3xl text-brand-green2">{pendingCount}</p>
+                            <p className="text-[11px] text-brand-black/50 font-medium">Canal web · cierre de venta en el Sheet</p>
                         </div>
                     </div>
 
@@ -229,88 +343,196 @@ export function DashboardClient({ userEmail }: DashboardClientProps) {
                     <div className="bg-white rounded-3xl border border-brand-green2/10 p-6 lg:p-8 shadow-sm space-y-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-brand-green2/10 pb-6">
                             <div>
-                                <h2 className="font-passion text-2xl text-brand-green2">
-                                    {activeTab === 'orders' && 'Registro Reciente de Pedidos'}
-                                    {activeTab === 'leads' && 'Leads y Alquiler de Barriles'}
-                                    {activeTab === 'catalog' && 'Estilos y Presentaciones'}
-                                    {activeTab === 'stock' && 'Inventario de Planta'}
-                                </h2>
-                                <p className="text-xs text-brand-black/60">Visualiza y gestiona la información en tiempo real</p>
+                                <h2 className="font-passion text-2xl text-brand-green2">{TAB_TITLES[activeTab]}</h2>
+                                <p className="text-xs text-brand-black/60">
+                                    {activeTab === 'orders' || activeTab === 'leads' || activeTab === 'catalog'
+                                        ? 'Datos del canal web (Supabase)'
+                                        : 'Datos en vivo del Sheet del cliente'}
+                                </p>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <button className="flex items-center gap-2 border border-brand-green2/15 rounded-xl px-4 py-2 text-xs font-bold text-brand-black hover:bg-brand-bone-white transition-colors cursor-pointer">
-                                    <Filter className="w-3.5 h-3.5" />
-                                    <span>Filtrar</span>
-                                </button>
-                                <button className="bg-brand-green2 text-brand-bone-white rounded-xl px-4 py-2 text-xs font-bold hover:bg-brand-black transition-colors cursor-pointer">
-                                    + Nuevo Registro
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleRefresh}
+                                disabled={isPending}
+                                className="flex items-center gap-2 border border-brand-green2/15 rounded-xl px-4 py-2 text-xs font-bold text-brand-black hover:bg-brand-bone-white transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                                <RefreshCcw className={`w-3.5 h-3.5 ${isPending ? 'animate-spin' : ''}`} />
+                                <span>Actualizar</span>
+                            </button>
                         </div>
 
-                        {activeTab === 'orders' && (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-sm font-body">
-                                    <thead>
-                                        <tr className="border-b border-brand-green2/10 text-xs font-bold uppercase tracking-wider text-brand-black/50">
-                                            <th className="pb-3">ID Órden</th>
-                                            <th className="pb-3">Cliente</th>
-                                            <th className="pb-3">Productos</th>
-                                            <th className="pb-3">Total</th>
-                                            <th className="pb-3">Estado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-brand-green2/5">
-                                        <tr>
-                                            <td className="py-4 font-bold text-brand-black">#ORD-9082</td>
-                                            <td className="py-4">Martín Gómez</td>
-                                            <td className="py-4 text-brand-black/70">Pack 6x Blonde Ale</td>
-                                            <td className="py-4 font-bold text-brand-green2">$18.500</td>
-                                            <td className="py-4">
-                                                <span className="bg-brand-green2/10 text-brand-green2 text-[10px] font-bold px-2.5 py-1 rounded-md">
-                                                    Completado
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-4 font-bold text-brand-black">#ORD-9083</td>
-                                            <td className="py-4">Laura Rossi</td>
-                                            <td className="py-4 text-brand-black/70">1x Barril 50L Stout</td>
-                                            <td className="py-4 font-bold text-brand-green2">$95.000</td>
-                                            <td className="py-4">
-                                                <span className="bg-brand-gold/20 text-brand-black text-[10px] font-bold px-2.5 py-1 rounded-md">
-                                                    Pendiente Despacho
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-
-                        {activeTab === 'leads' && (
-                            <div className="py-8 text-center space-y-2">
-                                <Users className="w-10 h-10 mx-auto text-brand-green2/30" />
-                                <p className="font-bold text-sm text-brand-black">Vista de Consultas de Eventos y Alquileres</p>
-                                <p className="text-xs text-brand-black/50">Aquí aparecerán los mensajes enviados desde el modal de contacto.</p>
-                            </div>
-                        )}
-
-                        {activeTab === 'catalog' && (
-                            <div className="py-8 text-center space-y-2">
-                                <Package className="w-10 h-10 mx-auto text-brand-green2/30" />
-                                <p className="font-bold text-sm text-brand-black">Catálogo de Cervezas y Formatos</p>
-                                <p className="text-xs text-brand-black/50">Administra precios, descripciones y fotos del menú.</p>
-                            </div>
-                        )}
-
+                        {/* ---------- STOCK (Sheet) ---------- */}
                         {activeTab === 'stock' && (
-                            <div className="py-8 text-center space-y-2">
-                                <Boxes className="w-10 h-10 mx-auto text-brand-green2/30" />
-                                <p className="font-bold text-sm text-brand-black">Control de Stock y Barriles</p>
-                                <p className="text-xs text-brand-black/50">Gestión de litros disponibles por lote y retorno de barriles.</p>
-                            </div>
+                            sheet ? (
+                                <div className="space-y-8">
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase tracking-wider text-brand-black/50 mb-3">Stock General por Estilo</h3>
+                                        <DataTable headers={['Estilo', 'Unidades']}>
+                                            {Object.entries(stockGeneral).map(([estilo, cant]) => (
+                                                <tr key={estilo}>
+                                                    <td className="py-3 font-semibold">{estilo}</td>
+                                                    <td className={`py-3 font-bold ${Number(cant) <= 0 ? 'text-red-600' : 'text-brand-green2'}`}>{cant}</td>
+                                                </tr>
+                                            ))}
+                                        </DataTable>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase tracking-wider text-brand-black/50 mb-3">Stock por Usuario</h3>
+                                        {/* ponytail: matriz completa usuario × estilo; si se vuelve ancha, paginar por usuario */}
+                                        <DataTable headers={['Usuario', ...Object.keys(stockGeneral), 'Total Sin Etiqueta']}>
+                                            {Object.entries(usuarios).map(([usuario, s]) => {
+                                                const totalSin = Object.values(s.stockSinEtiqueta || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+                                                return (
+                                                    <tr key={usuario}>
+                                                        <td className="py-3 font-semibold">{usuario}</td>
+                                                        {Object.keys(stockGeneral).map((estilo) => (
+                                                            <td key={estilo} className="py-3 text-center">{Number(s.stock?.[estilo]) || 0}</td>
+                                                        ))}
+                                                        <td className="py-3 text-center font-bold">{totalSin}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </DataTable>
+                                    </div>
+                                </div>
+                            ) : (
+                                <Empty
+                                    title="No se pudieron leer los datos del Sheet"
+                                    sub="Verificá que el Apps Script esté publicado y accesible."
+                                />
+                            )
+                        )}
+
+                        {/* ---------- CLIENTES (Sheet) ---------- */}
+                        {activeTab === 'clientes' && (
+                            sheet && sheet.clientes?.length ? (
+                                <DataTable headers={['Nombre', 'Deuda', 'Pagado']}>
+                                    {sheet.clientes.map((c) => (
+                                        <tr key={c.nombre}>
+                                            <td className="py-3 font-semibold">{c.nombre}</td>
+                                            <td className={`py-3 font-bold ${c.deuda > 0 ? 'text-red-600' : 'text-brand-green2'}`}>{fmt.format(c.deuda)}</td>
+                                            <td className="py-3">{fmt.format(c.pagado)}</td>
+                                        </tr>
+                                    ))}
+                                </DataTable>
+                            ) : (
+                                <Empty
+                                    title={sheet ? 'Sin clientes en cuenta corriente' : 'No se pudieron leer los datos del Sheet'}
+                                />
+                            )
+                        )}
+
+                        {/* ---------- BARRILES (Sheet) ---------- */}
+                        {activeTab === 'barriles' && (
+                            sheet && sheet.barrilesDisponibles?.length ? (
+                                <DataTable headers={['Tipo', 'Tamaño', 'Serie']}>
+                                    {sheet.barrilesDisponibles.map((b) => (
+                                        <tr key={b.id}>
+                                            <td className="py-3 font-semibold">{b.tipo}</td>
+                                            <td className="py-3">{b.tamano}</td>
+                                            <td className="py-3">{b.serie}</td>
+                                        </tr>
+                                    ))}
+                                </DataTable>
+                            ) : (
+                                <Empty
+                                    title={sheet ? 'Sin barriles disponibles' : 'No se pudieron leer los datos del Sheet'}
+                                />
+                            )
+                        )}
+
+                        {/* ---------- GASTOS (Sheet) ---------- */}
+                        {activeTab === 'gastos' && (
+                            gastosData?.gastos?.length ? (
+                                <div className="space-y-4">
+                                    <p className="text-xs font-bold text-brand-black/60 uppercase tracking-wider">
+                                        Total del ciclo: <span className="text-red-600">{fmt.format(gastosTotal)}</span>
+                                    </p>
+                                    <DataTable headers={['Item', 'Monto', 'Obs', 'Fecha']}>
+                                        {gastosData.gastos.map((g) => (
+                                            <tr key={g.idFila}>
+                                                <td className="py-3 font-semibold">{g.item}</td>
+                                                <td className="py-3 font-bold text-red-600">{fmt.format(Number(g.monto) || 0)}</td>
+                                                <td className="py-3 text-brand-black/70">{g.obs}</td>
+                                                <td className="py-3">{g.fecha}</td>
+                                            </tr>
+                                        ))}
+                                    </DataTable>
+                                </div>
+                            ) : (
+                                <Empty
+                                    title={gastosData ? 'Sin gastos registrados' : 'No se pudieron leer los gastos del Sheet'}
+                                />
+                            )
+                        )}
+
+                        {/* ---------- ÓRDENES WEB (Supabase) ---------- */}
+                        {activeTab === 'orders' && (
+                            orders.length ? (
+                                <DataTable headers={['#', 'Cliente', 'Productos', 'Total', 'Estado', 'Fecha']}>
+                                    {orders.map((o) => {
+                                        const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'bg-brand-black/10 text-brand-black/60' };
+                                        return (
+                                            <tr key={o.id}>
+                                                <td className="py-4 font-bold">#{o.orderNumber}</td>
+                                                <td className="py-4">{o.customerName}</td>
+                                                <td className="py-4 text-brand-black/70">
+                                                    {o.items.map((i) => `${i.quantity}× ${i.title}`).join(', ') || '—'}
+                                                </td>
+                                                <td className="py-4 font-bold text-brand-green2">{fmt.format(o.total)}</td>
+                                                <td className="py-4">
+                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${st.cls}`}>{st.label}</span>
+                                                </td>
+                                                <td className="py-4 text-brand-black/60">{fmtDate(o.createdAt)}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </DataTable>
+                            ) : (
+                                <Empty title="Sin órdenes web todavía" sub="Las órdenes del canal web aparecerán acá." />
+                            )
+                        )}
+
+                        {/* ---------- LEADS (Supabase) ---------- */}
+                        {activeTab === 'leads' && (
+                            leads.length ? (
+                                <DataTable headers={['Nombre', 'Contacto', 'Evento', 'Estado', 'Fecha']}>
+                                    {leads.map((l) => (
+                                        <tr key={l.id}>
+                                            <td className="py-4 font-semibold">{l.name}</td>
+                                            <td className="py-4 text-brand-black/70">{l.email || l.phone || '—'}</td>
+                                            <td className="py-4">{l.eventType || '—'}</td>
+                                            <td className="py-4">{LEAD_STATUS[l.status] || l.status}</td>
+                                            <td className="py-4 text-brand-black/60">{fmtDate(l.createdAt)}</td>
+                                        </tr>
+                                    ))}
+                                </DataTable>
+                            ) : (
+                                <Empty title="Sin consultas todavía" sub="Los mensajes del formulario de contacto aparecerán acá." />
+                            )
+                        )}
+
+                        {/* ---------- CATÁLOGO (Supabase) ---------- */}
+                        {activeTab === 'catalog' && (
+                            products.length ? (
+                                <DataTable headers={['Producto', 'Precio', 'Stock', 'Estado']}>
+                                    {products.map((p) => (
+                                        <tr key={p.id}>
+                                            <td className="py-3 font-semibold">{p.title}</td>
+                                            <td className="py-3 font-bold text-brand-green2">{fmt.format(p.price)}</td>
+                                            <td className={`py-3 font-bold ${p.stock <= 0 ? 'text-red-600' : ''}`}>{p.stock}</td>
+                                            <td className="py-3">
+                                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${p.isActive ? 'bg-brand-green2/10 text-brand-green2' : 'bg-brand-black/10 text-brand-black/60'}`}>
+                                                    {p.isActive ? 'Activo' : 'Inactivo'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </DataTable>
+                            ) : (
+                                <Empty title="Sin productos en el catálogo" />
+                            )
                         )}
                     </div>
                 </div>
