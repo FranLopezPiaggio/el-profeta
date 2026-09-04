@@ -6,49 +6,15 @@ import { ScaleIn } from '../../common/ScaleIn';
 import Image from 'next/image';
 
 
-const MOCK_BEERS: Beer[] = [
-    {
-        id: '1',
-        name: 'Golden Ale',
-        tagline: 'Refrescante, ligera y de trago fácil. Ideal para días de calor.',
-        category: 'rubias',
-        abv: 4.8,
-        ibu: 18,
-        price: 3200,
-        imageSrc: '/beers/blonde-removebg-preview.png',
-        isPopular: true,
-    },
-    {
-        id: '2',
-        name: 'IPA Solaria',
-        tagline: 'Intenso aroma a lúpulo cítrico y tropical con amargor marcado.',
-        category: 'ipa',
-        abv: 6.2,
-        ibu: 55,
-        price: 3800,
-        imageSrc: '/beers/blonde-removebg-preview.png',
-    },
-    {
-        id: '3',
-        name: 'Red Honey',
-        tagline: 'Miel pura de monte combinada con maltas caramelizadas.',
-        category: 'negras',
-        abv: 5.5,
-        ibu: 22,
-        price: 3500,
-        imageSrc: '/beers/blonde-removebg-preview.png',
-        isPopular: true,
-    },
-];
-
 interface BeerCatalogProps {
     selectedCategory: BeerCategory;
+    beers: Beer[];
 }
 
-export function BeerCatalog({ selectedCategory }: BeerCatalogProps) {
+export function BeerCatalog({ selectedCategory, beers }: BeerCatalogProps) {
     const filteredBeers = selectedCategory === 'todos'
-        ? MOCK_BEERS
-        : MOCK_BEERS.filter((beer) => beer.category === selectedCategory);
+        ? beers
+        : beers.filter((beer) => beer.category === selectedCategory);
 
     return (
         <section

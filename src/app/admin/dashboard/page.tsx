@@ -1,24 +1,7 @@
 import { createClient } from '@/shared/infrastructure/supabase/server';
 import { redirect } from 'next/navigation';
-import { DashboardClient, type SheetData, type GastosData, type OrderRow, type LeadRow, type ProductRow } from './DashboardClient';
-
-// ponytail: URL pública del Apps Script del cliente (la misma que usa elprofetacontrolstock/config.js).
-// Es un GET sin auth. Si algún día le ponemos auth, mover a .env.
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycby7ZfA_-VqqYL0cG-we3cUmP1kaKTY_4D3l5VjfjqIg2jFwbwy8vx1W5r_jsmT9Si-QrA/exec';
-
-async function fetchSheet<T>(accion?: string): Promise<T | null> {
-    try {
-        const url = `${SHEET_URL}?${accion ? `accion=${accion}&` : ''}v=${Date.now()}`;
-        // ponytail: Apps Script tarda ~8s (cold) — 30s de techo; si crece, espejar a Supabase
-        const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(30000) });
-        if (!res.ok) return null;
-        const text = (await res.text()).replace(/^\uFEFF/, '').trim();
-        const json = JSON.parse(text);
-        return json?.error ? null : (json as T);
-    } catch {
-        return null;
-    }
-}
+import { DashboardClient, type GastosData, type OrderRow, type LeadRow, type ProductRow } from './DashboardClient';
+import { getSheetCached, type SheetData } from '@/lib/sheet';
 
 export default async function AdminDashboardPage() {
     const supabase = await createClient();
@@ -33,10 +16,10 @@ export default async function AdminDashboardPage() {
 
     // 3. Sheet del cliente (SSOT) + canal web (Supabase), en paralelo
     const [sheet, gastosData, ordersRes, pendingRes, leadsRes, productsRes] = await Promise.all([
-        fetchSheet<SheetData>(),
+        getSheetCached<SheetData>(),
         // ponytail: leerGastos por GET ?accion=leerGastos (acción ya existente en Code.gs).
         // Si el dispatcher no la soporta por GET, devuelve error → tab vacío, sin romper nada.
-        fetchSheet<GastosData>('leerGastos'),
+        getSheetCached<GastosData>('leerGastos'),
         supabase
             .from('orders')
             .select('id, order_number, customer_name, total_amount, status, created_at, order_items(product_title, quantity, unit_price)')
@@ -88,6 +71,26 @@ export default async function AdminDashboardPage() {
 
     const pendingCount = pendingRes.count ?? 0;
 
+    // ponytail: catálogo híbrido — deducido del Sheet (SSOT stock+precio), enriquecido con Supabase si existe
+    // Sin migración: si products no tiene fila para el estilo, cae a placeholder (descripción/abv/imagen)
+    const cfg = (sheet?.configuracion || {}) as Record<string, number>;
+    const catalogHybrid = Object.entries(sheet?.stockGeneral || {}).map(([estilo, stock]) => {
+        const isLup = estilo.includes('IPA');
+        const prod = products.find((p) => p.title.toLowerCase() === estilo.toLowerCase());
+        return {
+            estilo,
+            stock: Number(stock) || 0,
+            priceMinorista: Number(cfg.precioMinorista) || 3500,
+            priceMayorista: Number(isLup ? cfg.precioMayoristaLupulada : cfg.precioMayoristaNormal) || 2400,
+            priceSix: Number(cfg.precioSixPack) || 3250,
+            priceDoce: Number(cfg.precioDocePack) || 3000,
+            // enrichment (nullable)
+            description: null as string | null,
+            image: null as string | null,
+            isActive: prod ? prod.isActive : true,
+        };
+    });
+
     // 4. Renderizar el cliente
     return (
         <DashboardClient
@@ -97,6 +100,7 @@ export default async function AdminDashboardPage() {
             orders={orders}
             leads={leads}
             products={products}
+            catalogHybrid={catalogHybrid}
             pendingCount={pendingCount}
         />
     );

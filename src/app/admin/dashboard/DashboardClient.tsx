@@ -21,26 +21,13 @@ import {
     Receipt,
 } from 'lucide-react';
 import { logoutAction } from '@/app/admin/login/actions';
+import { updateOrderStatusAction, deleteOrderAction } from './actions';
 
 // ============================================================
 // TIPOS — datos del Sheet (SSOT del cliente) y del canal web
 // ============================================================
 
-export interface SheetData {
-    stockGeneral: Record<string, number>;
-    usuarios: Record<string, { stock: Record<string, number>; stockSinEtiqueta: Record<string, number> }>;
-    clientes: { nombre: string; deuda: number; pagado: number }[];
-    barrilesDisponibles: { id: string; tipo: string; tamano: string; serie: string }[];
-    totalIngresadoSheet: number;
-    efectivoSheet: number;
-    transferenciaSheet: number;
-    paraProfetaSheet: number;
-    cicloFechaCorte: number;
-    profetaInicialCiclo: number;
-    configuracion: Record<string, unknown>;
-    historialStock: { fecha: string; usuario: string; estilos: Record<string, number>; tipo: string }[];
-    historialTransferencias: { fecha: string; desde: string; hacia: string; estilos: Record<string, number>; tipo: string }[];
-}
+import type { SheetData } from '@/lib/sheet';
 
 export interface GastosData {
     gastos: { idFila: string; item: string; monto: number; obs: string; fecha: string }[];
@@ -74,6 +61,18 @@ export interface ProductRow {
     isActive: boolean;
 }
 
+export interface CatalogHybridRow {
+    estilo: string;
+    stock: number;
+    priceMinorista: number;
+    priceMayorista: number;
+    priceSix: number;
+    priceDoce: number;
+    description: string | null;
+    image: string | null;
+    isActive: boolean;
+}
+
 interface DashboardClientProps {
     userEmail: string;
     sheet: SheetData | null;
@@ -81,6 +80,7 @@ interface DashboardClientProps {
     orders: OrderRow[];
     leads: LeadRow[];
     products: ProductRow[];
+    catalogHybrid: CatalogHybridRow[];
     pendingCount: number;
 }
 
@@ -159,7 +159,9 @@ function Empty({ title, sub }: { title: string; sub?: string }) {
 // DASHBOARD
 // ============================================================
 
-export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, products, pendingCount }: DashboardClientProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _ORDER_STATUS_UNUSED = ORDER_STATUS;
+export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, products: _products, catalogHybrid, pendingCount }: DashboardClientProps) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabType>('stock');
     const [isPending, startTransition] = useTransition();
@@ -171,7 +173,10 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
     };
 
     const handleRefresh = () => {
-        startTransition(() => router.refresh());
+        startTransition(async () => {
+            await fetch('/api/revalidate', { method: 'POST' });
+            router.refresh();
+        });
     };
 
     // Métricas reales del Sheet
@@ -345,9 +350,11 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
                             <div>
                                 <h2 className="font-passion text-2xl text-brand-green2">{TAB_TITLES[activeTab]}</h2>
                                 <p className="text-xs text-brand-black/60">
-                                    {activeTab === 'orders' || activeTab === 'leads' || activeTab === 'catalog'
+                                    {activeTab === 'orders' || activeTab === 'leads'
                                         ? 'Datos del canal web (Supabase)'
-                                        : 'Datos en vivo del Sheet del cliente'}
+                                        : activeTab === 'catalog'
+                                            ? 'Catálogo espejo del Sheet (precio/stock deducidos) + Supabase si existe'
+                                            : 'Datos en vivo del Sheet del cliente'}
                                 </p>
                             </div>
 
@@ -357,7 +364,7 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
                                 className="flex items-center gap-2 border border-brand-green2/15 rounded-xl px-4 py-2 text-xs font-bold text-brand-black hover:bg-brand-bone-white transition-colors cursor-pointer disabled:opacity-50"
                             >
                                 <RefreshCcw className={`w-3.5 h-3.5 ${isPending ? 'animate-spin' : ''}`} />
-                                <span>Actualizar</span>
+                                <span>Sincronizar con Sheet</span>
                             </button>
                         </div>
 
@@ -467,12 +474,11 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
                             )
                         )}
 
-                        {/* ---------- ÓRDENES WEB (Supabase) ---------- */}
+                        {/* ---------- ÓRDENES WEB (Supabase) — SSOT web, único editable: estado ---------- */}
                         {activeTab === 'orders' && (
                             orders.length ? (
-                                <DataTable headers={['#', 'Cliente', 'Productos', 'Total', 'Estado', 'Fecha']}>
+                                <DataTable headers={['#', 'Cliente', 'Productos', 'Total', 'Estado', 'Fecha', '']}>
                                     {orders.map((o) => {
-                                        const st = ORDER_STATUS[o.status] || { label: o.status, cls: 'bg-brand-black/10 text-brand-black/60' };
                                         return (
                                             <tr key={o.id}>
                                                 <td className="py-4 font-bold">#{o.orderNumber}</td>
@@ -482,9 +488,34 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
                                                 </td>
                                                 <td className="py-4 font-bold text-brand-green2">{fmt.format(o.total)}</td>
                                                 <td className="py-4">
-                                                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${st.cls}`}>{st.label}</span>
+                                                    <select
+                                                        defaultValue={o.status}
+                                                        disabled={isPending}
+                                                        onChange={(e) => {
+                                                            const next = e.target.value as 'pending' | 'completed' | 'cancelled' | 'expired';
+                                                            startTransition(async () => { await updateOrderStatusAction(o.id, next); router.refresh(); });
+                                                        }}
+                                                        className="text-[11px] font-bold rounded-md border border-brand-green2/15 px-2 py-1 bg-white"
+                                                    >
+                                                        <option value="pending">Pendiente</option>
+                                                        <option value="completed">Completada</option>
+                                                        <option value="cancelled">Cancelada</option>
+                                                        <option value="expired">Vencida</option>
+                                                    </select>
                                                 </td>
                                                 <td className="py-4 text-brand-black/60">{fmtDate(o.createdAt)}</td>
+                                                <td className="py-4">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!confirm('¿Borrar orden #' + o.orderNumber + '?')) return;
+                                                            startTransition(async () => { await deleteOrderAction(o.id); router.refresh(); });
+                                                        }}
+                                                        disabled={isPending}
+                                                        className="text-[11px] font-bold text-red-600 hover:underline disabled:opacity-50"
+                                                    >
+                                                        Borrar
+                                                    </button>
+                                                </td>
                                             </tr>
                                         );
                                     })}
@@ -513,25 +544,29 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
                             )
                         )}
 
-                        {/* ---------- CATÁLOGO (Supabase) ---------- */}
+                        {/* ---------- CATÁLOGO HÍBRIDO (Sheet SSOT stock+precio, App enriquece) ---------- */}
                         {activeTab === 'catalog' && (
-                            products.length ? (
-                                <DataTable headers={['Producto', 'Precio', 'Stock', 'Estado']}>
-                                    {products.map((p) => (
-                                        <tr key={p.id}>
-                                            <td className="py-3 font-semibold">{p.title}</td>
-                                            <td className="py-3 font-bold text-brand-green2">{fmt.format(p.price)}</td>
-                                            <td className={`py-3 font-bold ${p.stock <= 0 ? 'text-red-600' : ''}`}>{p.stock}</td>
+                            // ponytail: 6 estilos fijos del Sheet; sin Supabase cae a placeholder
+                            catalogHybrid.length ? (
+                                <DataTable headers={['Estilo', 'Stock', 'Minorista', 'Mayorista', 'SixPack', 'DocePack', 'Estado']}>
+                                    {catalogHybrid.map((c) => (
+                                        <tr key={c.estilo}>
+                                            <td className="py-3 font-semibold">{c.estilo}</td>
+                                            <td className={`py-3 font-bold ${c.stock <= 0 ? 'text-red-600' : ''}`}>{c.stock}</td>
+                                            <td className="py-3">{fmt.format(c.priceMinorista)}</td>
+                                            <td className="py-3">{fmt.format(c.priceMayorista)}</td>
+                                            <td className="py-3">{fmt.format(c.priceSix)}</td>
+                                            <td className="py-3">{fmt.format(c.priceDoce)}</td>
                                             <td className="py-3">
-                                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${p.isActive ? 'bg-brand-green2/10 text-brand-green2' : 'bg-brand-black/10 text-brand-black/60'}`}>
-                                                    {p.isActive ? 'Activo' : 'Inactivo'}
+                                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${c.isActive ? 'bg-brand-green2/10 text-brand-green2' : 'bg-brand-black/10 text-brand-black/60'}`}>
+                                                    {c.isActive ? 'Activo' : 'Inactivo'}
                                                 </span>
                                             </td>
                                         </tr>
                                     ))}
                                 </DataTable>
                             ) : (
-                                <Empty title="Sin productos en el catálogo" />
+                                <Empty title={sheet ? 'Sin estilos en stockGeneral' : 'No se pudo leer el Sheet para catálogo'} />
                             )
                         )}
                     </div>

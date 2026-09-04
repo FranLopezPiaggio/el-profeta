@@ -41,3 +41,10 @@ export async function updateLeadStatusAction(leadId: string, status: 'new' | 'co
     if (error) throw new Error(error.message);
     revalidatePath('/admin/dashboard');
 }
+
+export async function deleteOrderAction(orderId: string) {
+    const supabase = await createClient();
+    const { error } = await supabase.from('orders').delete().eq('id', orderId);
+    if (error) throw new Error(error.message);
+    revalidatePath('/admin/dashboard');
+}
