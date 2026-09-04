@@ -192,17 +192,24 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
 
             {/* 1. SIDEBAR NAVIGATION */}
             <aside className="w-64 bg-white border-r border-brand-green2/10 flex flex-col justify-between hidden md:flex shrink-0">
-                <div className="p-6 space-y-8">
+                <div className="p-6 pt-8 space-y-8">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2 font-body text-xs font-bold text-brand-black/60 hover:text-brand-black transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Volver a la tienda</span>
+                    </Link>
 
                     {/* Logo / Identidad */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 pt-2">
                         <div className="w-20 h-20 flex items-center justify-center text-brand-gold">
                             <Image
                                 src="/logo-removebg-preview.png"
                                 alt="El Profeta Logo"
                                 width={120}
                                 height={120}
-                                className="-mt-20 z-20"
+                                className="-mt-10 z-20"
                             />
                         </div>
                         <div>

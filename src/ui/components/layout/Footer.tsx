@@ -69,10 +69,10 @@ export function Footer() {
                                 <Phone className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
                                 <span>+54 (11) 1234-5678</span>
                             </li>
-                            <li className="flex items-center gap-2.5">
+                            {/* <li className="flex items-center gap-2.5">
                                 <Mail className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
                                 <span>eventos@cervezaelprofeta.com</span>
-                            </li>
+                            </li> */}
                             <li className="flex items-center gap-2.5">
                                 <MapPin className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
                                 <span>Berazategui</span>
@@ -95,7 +95,7 @@ export function Footer() {
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B2314]/40 border border-[#3B2314] text-xs font-semibold text-white hover:border-[#D98A29] hover:text-[#D98A29] transition-all"
                             >
-                                <span>@cervezaelprofeta</span>
+                                <span>@elprofetacervezaartesanal</span>
                             </a>
                         </div>
                     </div>

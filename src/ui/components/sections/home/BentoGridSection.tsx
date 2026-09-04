@@ -57,7 +57,8 @@ export function BentoGridSection() {
                 />
 
                 {/* Bento Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 auto-rows-[120px] gap-6">
+                {/* ponytail: auto-rows minmax evita pisado en mobile (cards min 220px); gap-4 da aire visible sin exagerar. Upgrade: masonry si hay 5+ cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-6 auto-rows-[minmax(220px,auto)] gap-4 md:gap-6">
                     {BENTO_ITEMS.map((item) => (
                         <BentoCard key={item.id} {...item} />
                     ))}
