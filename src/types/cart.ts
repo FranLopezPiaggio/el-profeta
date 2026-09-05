@@ -1,11 +1,14 @@
 export interface CartItem {
     id: string;
     name: string;
-    style: string; // Ej: "IPA", "Blonde", "Stout"
+    style: string;
     price: number;
+    priceMin?: number;
+    priceSix?: number;
+    priceDoce?: number;
     image: string;
     quantity: number;
-    format?: string; // Ej: "Lata 473ml", "Botella 500ml", "Pack x6"
+    format?: string;
 }
 
 export interface CartStore {

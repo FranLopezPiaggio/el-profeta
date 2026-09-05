@@ -1,9 +1,7 @@
-// ⚡️ Ponytail mode: full — lazy senior dev, minimum that works.
-// This edge function pulls stockGeneral from the client's Google Sheet
-// (elprofetacontrolstock) and upserts it into Supabase products_variant.stock.
-// Runs via cron every 5–15 min. Keeps dashboard stock "stale but safe".
-// Ceiling: stock can be up to 15 min stale. Upgrade path: add stock_con/stock_sin
-// columns + stock_movements table for full audit.
+// ⚡️ Ponytail mode: full — minimum that works.
+// Sheet = precio+stock (configuracion + stockGeneral) → Supabase products.
+// Supabase owns descripcion/images/abv/ibu; this sync solo pisa stock+price+attributes.price_tiers.
+// ponytail: tiers globales (minorista/six/doce), per-style si Configuracion los agrega por clave
 
 import "@supabase/functions-js/edge-runtime.d.ts"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
@@ -41,26 +39,46 @@ export async function onRequest(context: any) {
     }
 
     const stockGeneral = datos.stockGeneral
+    const configuracion = (datos as any).configuracion || {}
+    const priceTiers = {
+      minorista: Number(configuracion.precioMinorista) || 3500,
+      six: Number(configuracion.precioSixPack) || 3250,
+      doce: Number(configuracion.precioDocePack) || 3000,
+    }
 
-    // 2️⃣ Initialize Supabase client for this edge function
+    // 2️⃣ Initialize Supabase client
     const supabase: SupabaseClient = createClient(
       context.supabaseUrl!,
       context.supabaseKey!
     )
 
-    // 3️⃣ Upsert each style stock into products_variant
-    // Minimum viable approach: update rows where title matches the style name exactly.
-    // This assumes products_variant.title values are exactly "BLONDE", "IRISH RED", etc.
-    // If your variants have different titles (e.g. "Blonde Ale 473ml"), adjust ESTILOS_BASE
-    // or update the schema so titles match these 6 keywords.
-    const updatePromises = ESTILOS_BASE.map((estilo) => {
+    // Resolve tenant id for slug el-profeta (ponytail: 1 tenant prod; upgrade to slug param si multi-tenant)
+    const { data: tenant } = await supabase.from("tenants").select("id").eq("slug", "el-profeta").maybeSingle()
+    const tenantId = (tenant as any)?.id
+    if (!tenantId) {
+      return new Response(JSON.stringify({ error: "tenant el-profeta no existe — correr seed primero" }), { status: 500, headers: { "Content-Type": "application/json" } })
+    }
+
+    // 3️⃣ Sync stock+price_tiers into products (slug = estilo lowercased, e.g. blonde, red-ipa)
+    // Solo pisa stock/price/attributes.price_tiers; descripcion/images/abv/ibu quedan en Supabase.
+    const SLUG_MAP: Record<string, string> = {
+      BLONDE: "blonde",
+      HONEY: "honey",
+      STOUT: "stout",
+      "IRISH RED": "irish-red",
+      "RED IPA": "red-ipa",
+      "SESSION IPA": "session-ipa",
+    }
+    const updatePromises = ESTILOS_BASE.map(async (estilo) => {
+      const slug = SLUG_MAP[estilo]
       const cantidad = Number(stockGeneral[estilo]) || 0
-      // Use PATCH with a filter on title — this is the "deliberate simplification" ceiling.
-      // If titles don't match, no rows get updated (safe failure, not a crash).
-      return supabase
-        .from("products_variant")
-        .update({ stock: cantidad })
-        .eq("title", estilo)
+      const { data: existing } = await supabase.from("products").select("id, attributes").eq("tenant_id", tenantId).eq("slug", slug).maybeSingle()
+      const mergedAttributes = { ...((existing as any)?.attributes || {}), price_tiers: priceTiers }
+      if ((existing as any)?.id) {
+        return supabase.from("products").update({ stock: cantidad, price: priceTiers.minorista, attributes: mergedAttributes }).eq("id", (existing as any).id)
+      }
+      // ponytail: si no existe producto, no lo crea el sync (seed lo hace); falla silenciosa para no inventar descripcion
+      return { error: null } as any
     })
 
     const results = await Promise.allSettled(updatePromises)

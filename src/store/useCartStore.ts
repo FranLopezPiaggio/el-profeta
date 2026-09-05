@@ -54,13 +54,17 @@ export const useCartStore = create<CartStore>()(
             // Limpiar Carrito
             clearCart: () => set({ items: [] }),
 
-            // Métodos de Cálculo
+            // Métodos de Cálculo — ponytail: tier global (1-5 minorista, 6-11 six, 12+ doce); upgrade a price_tiers por producto si Sheet lo agrega
             getTotalItems: () => {
                 return get().items.reduce((total, item) => total + item.quantity, 0);
             },
 
             getSubtotal: () => {
-                return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
+                return get().items.reduce((total, item) => {
+                    const q = item.quantity;
+                    const unit = q >= 12 ? (item.priceDoce ?? item.price) : q >= 6 ? (item.priceSix ?? item.price) : (item.priceMin ?? item.price);
+                    return total + unit * q;
+                }, 0);
             },
         }),
         {

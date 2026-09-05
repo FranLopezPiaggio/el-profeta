@@ -34,6 +34,22 @@ export type SheetData = {
     historialTransferencias: { fecha: string; desde: string; hacia: string; estilos: Record<string, number>; tipo: string }[];
 };
 
+// ponytail: tiers globales desde Configuracion — si Sheet agrega por estilo, mover a attributes.price_tiers por producto
+export function getUnitPrice(qty: number, b: { priceMin?: number; priceSix?: number; priceDoce?: number; price: number }): number {
+    if (qty >= 12) return b.priceDoce ?? b.price;
+    if (qty >= 6) return b.priceSix ?? b.price;
+    return b.priceMin ?? b.price;
+}
+
+const BEER_IMAGE: Record<string, string> = {
+    BLONDE: '/products/blonde-ale.png',
+    HONEY: '/products/honey.png',
+    STOUT: '/products/stout.png',
+    'IRISH RED': '/products/irish-red.png',
+    'RED IPA': '/products/red-ipa.png',
+    'SESSION IPA': '/products/session-ipa.png',
+};
+
 export function sheetToBeers(sheet: SheetData | null) {
     if (!sheet) return [];
     const cfg = sheet.configuracion || {};
@@ -45,11 +61,10 @@ export function sheetToBeers(sheet: SheetData | null) {
         'RED IPA': 'rojas',
         'SESSION IPA': 'ipa',
     };
-    // ponytail: tagline/abv/ibu no existen en Sheet → placeholder; upgrade si Configuracion los agrega
+    // ponytail: tagline/abv/ibu vienen de Supabase products.attributes; acá placeholder hasta migrar page a Supabase
     return Object.entries(sheet.stockGeneral)
         .filter(([k]) => k !== 'LATAS SIN ETIQUETA')
         .map(([estilo, stock]) => {
-            const isLup = estilo.includes('IPA');
             return {
                 id: estilo.toLowerCase().replace(/\s+/g, '-'),
                 name: estilo,
@@ -59,12 +74,12 @@ export function sheetToBeers(sheet: SheetData | null) {
                 ibu: 20,
                 price: Number(cfg.precioMinorista) || 3500,
                 priceMin: Number(cfg.precioMinorista) || 3500,
-                priceMay: Number(isLup ? cfg.precioMayoristaLupulada : cfg.precioMayoristaNormal) || 2400,
+                priceMay: Number(cfg.precioMayoristaNormal) || 2400,
                 priceSix: Number(cfg.precioSixPack) || 3250,
                 priceDoce: Number(cfg.precioDocePack) || 3000,
                 style: estilo,
                 stock: Number(stock) || 0,
-                imageSrc: '/beers/blonde-removebg-preview.png',
+                imageSrc: BEER_IMAGE[estilo] || '/products/blonde-ale.png',
             } as import('@/types/beers').Beer & { stock: number };
         });
 }

@@ -182,10 +182,20 @@ export function CartDrawer() {
                         </button>
                       </div>
 
-                      {/* Precio total por ítem */}
-                      <span className="font-body text-sm font-bold text-brand-green2">
-                        ${(item.price * item.quantity).toLocaleString('es-AR')}
-                      </span>
+                      {/* Precio total por ítem — ponytail: tier global, mismo helper que store */}
+                      {(() => {
+                        const unit = item.quantity >= 12 ? (item.priceDoce ?? item.price) : item.quantity >= 6 ? (item.priceSix ?? item.price) : (item.priceMin ?? item.price);
+                        return (
+                          <div className="text-right">
+                            <span className="font-body text-sm font-bold text-brand-green2">
+                              ${(unit * item.quantity).toLocaleString('es-AR')}
+                            </span>
+                            {unit !== (item.priceMin ?? item.price) && (
+                              <p className="font-body text-[10px] text-brand-black/40">${unit.toLocaleString('es-AR')} c/u</p>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 

@@ -8,7 +8,7 @@ interface BeerCardProps {
 
 export function BeerCard({ beer }: BeerCardProps) {
     return (
-        <article className="group relative bg-white p-5 border border-brand-earth/10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
+        <article className="group relative bg-white border border-brand-earth/10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden">
             {/* Badge de Popularidad / Destacado */}
             {beer.isPopular && (
                 <span className="absolute top-4 left-4 z-10 bg-brand-gold text-brand-earth font-fredoka text-xs font-bold px-3 py-1 shadow-sm">
@@ -17,7 +17,7 @@ export function BeerCard({ beer }: BeerCardProps) {
             )}
 
             {/* Imagen del Producto con Aspect Ratio Seguro */}
-            <div className="relative w-full h-56 my-2 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+            <div className="relative w-full h-56 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                 <Image
                     src={beer.imageSrc}
                     alt={`Lata de cerveza ${beer.name}`}
@@ -28,7 +28,7 @@ export function BeerCard({ beer }: BeerCardProps) {
             </div>
 
             {/* Información del Producto */}
-            <div className="mt-2 flex-1 flex flex-col justify-between">
+            <div className="mt-2 flex-1 flex flex-col justify-between  p-5">
                 <div>
                     <div className="flex items-center justify-between gap-2">
                         <h3 className="font-passion text-2xl text-stone-900 group-hover:text-brand-green transition-colors">
@@ -47,12 +47,12 @@ export function BeerCard({ beer }: BeerCardProps) {
                 {/* Especificaciones Técnicas (ABV & IBU) */}
                 <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
                     <div className="flex items-center gap-3 text-xs font-fredoka text-stone-600 font-semibold">
-                        <span className="bg-stone-100 px-2.5 py-1 rounded-md">
+                        {/* <span className="bg-stone-100 px-2.5 py-1 rounded-md">
                             ABV: {beer.abv}%
                         </span>
                         <span className="bg-stone-100 px-2.5 py-1 rounded-md">
                             IBU: {beer.ibu}
-                        </span>
+                        </span> */}
                     </div>
 
                     <AddToCartTrigger
@@ -61,6 +61,10 @@ export function BeerCard({ beer }: BeerCardProps) {
                             name: beer.name,
                             style: beer.style || 'Cerveza Artesanal',
                             price: beer.price,
+                            // ponytail: tier prices via Beer props; upgrade to product.attributes.price_tiers when page lee Supabase
+                            priceMin: beer.priceMin,
+                            priceSix: beer.priceSix,
+                            priceDoce: beer.priceDoce,
                             image: beer.imageSrc,
                             format: 'Lata 473ml'
                         }}

@@ -3,6 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, Mail, MapPin } from 'lucide-react';
 
+// encoded URL WP Msg
+const phone = "5491162712793";
+const message = encodeURIComponent("Hola! Quiero una El Profeta bien fria!");
+const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+
 export function Footer() {
     return (
         <footer className="bg-brand-green2 text-brand-bone-white pt-16 pb-12">
@@ -65,10 +70,18 @@ export function Footer() {
                             Contacto
                         </h4>
                         <ul className="space-y-3 text-sm font-body text-[#F3EBDD]/70">
-                            <li className="flex items-center gap-2.5">
-                                <Phone className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
-                                <span>+54 (11) 1234-5678</span>
-                            </li>
+                        <li className="flex items-center gap-2.5">
+                          <a 
+                            // href="https://wa.me/5491162712793?text=Hola%21%20Quiero%20una%20El%20Profeta%20bien%20fria%21" 
+                            href={whatsappUrl}
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+                          >
+                            <Phone className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
+                            <span>+54(11)62712793</span>
+                          </a>
+                        </li>
                             {/* <li className="flex items-center gap-2.5">
                                 <Mail className="w-4 h-4 text-[#D98A29] flex-shrink-0" />
                                 <span>eventos@cervezaelprofeta.com</span>
@@ -90,7 +103,7 @@ export function Footer() {
                         </p>
                         <div className="pt-2">
                             <a
-                                href="https://instagram.com"
+                                href="https://www.instagram.com/elprofetacervezaartesanal?igsi=MXQ0eDNpdGQ2aGNxdw=="
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#3B2314]/40 border border-[#3B2314] text-xs font-semibold text-white hover:border-[#D98A29] hover:text-[#D98A29] transition-all"
