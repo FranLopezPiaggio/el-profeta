@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Beer, ShieldCheck, Send, MapPin, Phone, Mail, User, MessageSquare } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
+import { createOrderAction } from '@/modules/orders/application/order.actions';
 
 export default function CheckoutPage() {
     const [mounted, setMounted] = useState(false);
@@ -37,44 +38,40 @@ export default function CheckoutPage() {
         setIsSubmitting(true);
 
         try {
-            // 1. Generar un Order ID único de muestra (Ej: ORD-8492)
-            const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
+            const normalizedPhone = (() => {
+                const digits = phone.replace(/\D/g, '');
+                if (!digits) return phone;
+                // ensure E.164: if input already has +, keep it
+                return phone.trim().startsWith('+') ? `+${digits}` : `+${digits}`;
+            })();
 
-            // 2. Aquí llamarías a tu Server Action o API Route para persistir la orden en tu DB
-            // await createOrderInDb({ orderId, fullName, email, phone, address, notes, items, subtotal });
-            console.log('Guardando en DB...', { orderId, fullName, email, phone, address, notes, items, subtotal });
+            const notesPayload = [email && `Email:${email}`, address && `Dir:${address}`, notes && `Notas:${notes}`]
+                .filter(Boolean)
+                .join(' | ');
 
-            // 3. Construir el mensaje formateado para WhatsApp
-            let waMessage = `*¡NUEVO PEDIDO EN EL PROFETA!* 🍺\n`;
-            waMessage += `*Orden ID:* #${orderId}\n\n`;
-            waMessage += `👤 *Cliente:* ${fullName}\n`;
-            waMessage += `📱 *Teléfono:* ${phone}\n`;
-            waMessage += `✉️ *Email:* ${email}\n`;
-            waMessage += `📍 *Dirección de Entrega:* ${address}\n\n`;
-
-            waMessage += `📦 *DETALLE DEL PEDIDO:*\n`;
-            items.forEach((item) => {
-                waMessage += `• ${item.quantity}x ${item.name} (${item.format || 'Lata'}) - $${(item.price * item.quantity).toLocaleString('es-AR')}\n`;
+            const result = await createOrderAction({
+                tenantSlug: 'el-profeta',
+                // ponytail: client-generated idempotency UUID, consider server-generated if replay abuse
+                idempotencyKey: crypto.randomUUID(),
+                customerName: fullName,
+                customerPhone: normalizedPhone,
+                notes: notesPayload || undefined,
+                items: items.map((i) => ({ productId: i.id, quantity: i.quantity })),
             });
 
-            waMessage += `\n💰 *Total a abonar:* $${subtotal.toLocaleString('es-AR')}\n`;
-
-            if (notes.trim()) {
-                waMessage += `💬 *Notas/Aclaraciones:* ${notes}\n`;
+            if (!result.success) {
+                console.error('Error creando orden:', result.error);
+                alert(result.error.message || 'No se pudo crear el pedido. Verificá los datos.');
+                setIsSubmitting(false);
+                return;
             }
 
-            waMessage += `\n_Aguardamos tu confirmación para coordinar el pago y la entrega._`;
-
-            // 4. Vaciar el carrito
             clearCart();
-
-            // 5. Abrir WhatsApp con el pedido armado
-            const whatsappNumber = '5491112345678'; // Reemplazar con el número oficial de la cervecería
-            const encodedUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
-            window.location.href = encodedUrl;
-
+            // ponytail: service-generated wa.me url is source of truth
+            window.location.href = result.data.whatsappUrl;
         } catch (error) {
             console.error('Error procesando la orden:', error);
+            alert('Ocurrió un error inesperado. Intentá nuevamente.');
             setIsSubmitting(false);
         }
     };

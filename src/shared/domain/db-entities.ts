@@ -82,3 +82,19 @@ export interface OrderItemEntity {
   created_at: string;
   updated_at: string;
 }
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'closed' | 'cancelled';
+
+export interface LeadEntity {
+  id: string;
+  tenant_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  event_type: string | null;
+  notes: string | null;
+  status: LeadStatus;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}

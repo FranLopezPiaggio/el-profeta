@@ -2,9 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, Mail, MapPin } from 'lucide-react';
+import { ContactTrigger } from '@/ui/components/modals/ContactTrigger';
 
 // encoded URL WP Msg
-const phone = "5491162712793";
+const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5491162712793';
 const message = encodeURIComponent("Hola! Quiero una El Profeta bien fria!");
 const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
 
@@ -60,6 +61,11 @@ export function Footer() {
                                 <Link href="#catalogo" className="hover:text-[#D98A29] transition-colors">
                                     Estilos de Cerveza
                                 </Link>
+                            </li>
+                            <li>
+                                <ContactTrigger className="hover:text-[#D98A29] transition-colors text-left">
+                                    Preguntas frecuentes
+                                </ContactTrigger>
                             </li>
                         </ul>
                     </div>

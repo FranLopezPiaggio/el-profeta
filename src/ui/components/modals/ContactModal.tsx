@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { X, Beer, PartyPopper, MessageSquare, Send, Calendar, MapPin, Phone, Mail, User } from 'lucide-react';
+import { createLeadAction } from '@/modules/leads/application/lead.actions';
 
 type ServiceType = 'contacto' | 'evento' | 'barril';
 
@@ -14,7 +15,7 @@ interface ContactModalProps {
     whatsappNumber?: string;
 }
 
-export function ContactModal({ isOpen, onClose, whatsappNumber = '5491112345678' }: ContactModalProps) {
+export function ContactModal({ isOpen, onClose, whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5491162712793' }: ContactModalProps) {
     const [mounted, setMounted] = useState(false);
     const [serviceType, setServiceType] = useState<ServiceType>('barril');
 
@@ -47,15 +48,40 @@ export function ContactModal({ isOpen, onClose, whatsappNumber = '5491112345678'
 
     if (!isOpen || !mounted) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // ponytail: best-effort persist, WA is source of truth if DB down
+        try {
+            const normalizedPhone = (() => {
+                const digits = phone.replace(/\D/g, '');
+                if (!digits) return phone;
+                return phone.trim().startsWith('+') ? `+${digits}` : `+${digits}`;
+            })();
+            await createLeadAction({
+                tenantSlug: 'el-profeta',
+                name: fullName,
+                email: email || null,
+                phone: normalizedPhone || null,
+                eventType: serviceType,
+                notes: message || undefined,
+                metadata: {
+                    address,
+                    beerStyle: serviceType === 'barril' ? beerStyle : undefined,
+                    liters: serviceType === 'barril' ? liters : undefined,
+                    eventDate: eventDate || undefined,
+                },
+            });
+        } catch {
+            // swallow — don't block wa.me
+        }
 
         let waText = `*NUEVA CONSULTA - EL PROFETA*\n\n`;
         waText += `📌 *Tipo:* ${serviceType === 'barril' ? 'Alquiler de Barril 🍺' : serviceType === 'evento' ? 'Evento Social/Corp 🎉' : 'Consulta General 💬'
             }\n`;
         waText += `👤 *Nombre:* ${fullName}\n`;
         waText += `📱 *Celular:* ${phone}\n`;
-        waText += `✉️ *Email:* ${email}\n`;
+        if (email) waText += `✉️ *Email:* ${email}\n`;
         waText += `📍 *Dirección/Zona:* ${address}\n`;
 
         if (serviceType === 'barril') {
@@ -199,12 +225,11 @@ export function ContactModal({ isOpen, onClose, whatsappNumber = '5491112345678'
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="block font-body text-xs font-bold text-brand-black/70">Correo Electrónico *</label>
+                            <label className="block font-body text-xs font-bold text-brand-black/70">Correo Electrónico</label>
                             <div className="relative flex items-center">
                                 <Mail className="w-4 h-4 absolute left-3.5 text-brand-black/30 pointer-events-none" />
                                 <input
                                     type="email"
-                                    required
                                     placeholder="juan@ejemplo.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
