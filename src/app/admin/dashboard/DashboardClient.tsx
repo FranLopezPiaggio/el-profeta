@@ -21,7 +21,7 @@ import {
     Receipt,
 } from 'lucide-react';
 import { logoutAction } from '@/app/admin/login/actions';
-import { updateOrderStatusAction, deleteOrderAction } from './actions';
+import { updateOrderStatusAction, deleteOrderAction, syncStockFromSheetAction } from './actions';
 
 // ============================================================
 // TIPOS — datos del Sheet (SSOT del cliente) y del canal web
@@ -165,6 +165,7 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabType>('stock');
     const [isPending, startTransition] = useTransition();
+    const [syncing, setSyncing] = useState(false);
 
     const handleLogout = () => {
         startTransition(async () => {
@@ -172,11 +173,17 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
         });
     };
 
-    const handleRefresh = () => {
-        startTransition(async () => {
+    // ponytail: manual sync from Sheet, automate with cron when needed
+    const handleRefresh = async () => {
+        setSyncing(true);
+        try {
+            const res = await syncStockFromSheetAction();
+            if (res?.message) console.log(res.message);
             await fetch('/api/revalidate', { method: 'POST' });
             router.refresh();
-        });
+        } finally {
+            setSyncing(false);
+        }
     };
 
     // Métricas reales del Sheet
@@ -367,11 +374,11 @@ export function DashboardClient({ userEmail, sheet, gastosData, orders, leads, p
 
                             <button
                                 onClick={handleRefresh}
-                                disabled={isPending}
+                                disabled={isPending || syncing}
                                 className="flex items-center gap-2 border border-brand-green2/15 rounded-xl px-4 py-2 text-xs font-bold text-brand-black hover:bg-brand-bone-white transition-colors cursor-pointer disabled:opacity-50"
                             >
-                                <RefreshCcw className={`w-3.5 h-3.5 ${isPending ? 'animate-spin' : ''}`} />
-                                <span>Sincronizar con Sheet</span>
+                                <RefreshCcw className={`w-3.5 h-3.5 ${syncing || isPending ? 'animate-spin' : ''}`} />
+                                <span>{syncing ? 'Sincronizando…' : 'Sincronizar con Sheet'}</span>
                             </button>
                         </div>
 

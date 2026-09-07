@@ -15,6 +15,10 @@ export interface Product {
   slug: string;
   description: string | null;
   price: number;
+  priceMin: number;
+  priceMay: number;
+  priceSix: number;
+  priceDoce: number;
   stock: number;
   sku: string | null;
   isActive: boolean;

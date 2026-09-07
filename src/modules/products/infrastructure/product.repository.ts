@@ -76,8 +76,13 @@ function mapProductRow(row: ProductEntity): Product {
     title: row.title,
     slug: row.slug,
     description: row.description,
+    // ponytail: price_min/may/six/doce from columns, fallback to legacy price/attributes; remove fallback when migration complete
     // PostgREST devuelve DECIMAL como string; normalizamos a number.
     price: Number(row.price),
+    priceMin: Number((row.price_min ?? row.price) as unknown as string | number),
+    priceMay: Number((row.price_may ?? row.price) as unknown as string | number),
+    priceSix: Number((row.price_six ?? row.price) as unknown as string | number),
+    priceDoce: Number((row.price_doce ?? row.price) as unknown as string | number),
     stock: row.stock,
     sku: row.sku,
     isActive: row.is_active,

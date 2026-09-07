@@ -50,6 +50,13 @@ function buildWhatsappUrl(
   return url.toString();
 }
 
+function tierPrice(qty: number, p: { price: number; price_min: number; price_six: number; price_doce: number }) {
+  // ponytail: retail tiers only (mayorista not used for web orders, add customer_type branch if wholesale needed)
+  if (qty >= 12) return Number((p.price_doce ?? p.price) as unknown as string | number);
+  if (qty >= 6) return Number((p.price_six ?? p.price) as unknown as string | number);
+  return Number((p.price_min ?? p.price) as unknown as string | number);
+}
+
 export class OrderService implements IOrderService {
   private repo = new OrderRepository();
 
@@ -76,19 +83,22 @@ export class OrderService implements IOrderService {
     // 2. Fetch active products for tenant (server-side price truth)
     const { data: products, error: prodError } = await supabaseAdmin
       .from('products')
-      .select('id, title, sku, price, slug')
+      .select('id, title, sku, price, price_min, price_may, price_six, price_doce, slug')
       .eq('tenant_id', tenantId)
       .eq('is_active', true);
 
     if (prodError) return Result.fail(toInternalError());
 
-    const productMap = new Map<string, { title: string; sku: string | null; price: number }>();
+    const productMap = new Map<string, { title: string; sku: string | null; price: number; price_min: number; price_six: number; price_doce: number }>();
     const slugToId = new Map<string, string>();
     for (const p of (products as Array<Record<string, unknown>>) ?? []) {
       productMap.set(p.id as string, {
         title: p.title as string,
         sku: (p.sku as string | null) ?? null,
         price: Number(p.price),
+        price_min: Number((p.price_min ?? p.price) as unknown as string | number),
+        price_six: Number((p.price_six ?? p.price) as unknown as string | number),
+        price_doce: Number((p.price_doce ?? p.price) as unknown as string | number),
       });
       if (p.slug) slugToId.set(p.slug as string, p.id as string);
     }
@@ -110,7 +120,7 @@ export class OrderService implements IOrderService {
       if (!prod) {
         return Result.fail({ code: 'PRODUCT_NOT_FOUND', message: `Producto no encontrado: ${it.productId}` });
       }
-      const unitPrice = Number(prod.price);
+      const unitPrice = tierPrice(it.quantity, prod);
       totalAmount += unitPrice * it.quantity;
       resolvedItems.push({
         productId: resolvedId,

@@ -9,8 +9,9 @@ const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
 // -----------------------------------------------------------------
 // A. DTO de Entrada: Item individual del Carrito enviado por el Cliente
 // -----------------------------------------------------------------
+// ponytail: accepts slug|uuid, resolves server-side to UUID; tighten to uuid only when storefront migrates to Supabase ids
 export const CartItemInputSchema = z.object({
-  productId: z.string().uuid({ message: 'El ID de producto no es un UUID válido' }),
+  productId: z.string().min(1, { message: 'ID de producto requerido' }).max(100),
   quantity: z
     .number()
     .int({ message: 'La cantidad debe ser un número entero' })

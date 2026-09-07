@@ -52,6 +52,10 @@ export interface ProductEntity {
   is_active: boolean;
   images: Array<{ id: string; url: string; order: number }>;
   attributes: Record<string, unknown>;
+  price_min: number;
+  price_may: number;
+  price_six: number;
+  price_doce: number;
   created_at: string;
   updated_at: string;
 }
